@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Есть строка с перечислением фильмов
-
 my_favorite_movies = 'Терминатор, Пятый элемент, Аватар, Чужие, Назад в будущее'
 
-# выведите на консоль с помощью индексации строки, последовательно:
-#   первый фильм
-#   последний
-#   второй
-#   второй с конца
-
-# обратите внимание что запятая не должна выводиться
-
+first_comma = my_favorite_movies.find(',')
+last_comma = my_favorite_movies.rfind(',')
+print(my_favorite_movies[:first_comma])
+print(my_favorite_movies[last_comma:].strip(', '))
+print(my_favorite_movies[first_comma:my_favorite_movies.find(',', first_comma+1)].strip(', '))
+print(my_favorite_movies[my_favorite_movies.rfind(',', 0, last_comma):last_comma].strip(', '))

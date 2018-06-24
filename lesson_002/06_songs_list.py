@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Есть список песен группы Depeche Mode со временем звучания с точносттю до долей минут
-
 violator_songs_list = [
     ['World in My Eyes', 4.86],
     ['Sweetest Perfection', 4.43],
@@ -15,9 +13,10 @@ violator_songs_list = [
     ['Clean', 5.83],
 ]
 
-# распечатайте общее время звучания песен 'Halo' 'Enjoy the Silence' 'Clean'
+print(violator_songs_list[3][1] +
+      violator_songs_list[5][1] +
+      violator_songs_list[8][1])
 
-# Есть словарь песен группы Depeche Mode
 violator_songs_dict = {
     'World in My Eyes': 4.76,
     'Sweetest Perfection': 4.43,
@@ -30,4 +29,6 @@ violator_songs_dict = {
     'Clean': 5.68,
 }
 
-# распечатайте общее время звучания песен 'Sweetest Perfection' 'Policy of Truth' 'Blue Dress'
+print(violator_songs_dict['Sweetest Perfection'] +
+      violator_songs_dict['Policy of Truth'] +
+      violator_songs_dict['Blue Dress'])
