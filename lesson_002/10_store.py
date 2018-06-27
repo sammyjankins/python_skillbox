@@ -55,7 +55,7 @@ chairs_quantity = store[goods['Стул']][0]['quantity']
 chairs_cost = chairs_quantity * store[goods['Стул']][0]['price']
 print('Стул -', chairs_quantity, 'шт, стоимость', chairs_cost, 'руб')
 
-
+# TODO: столов стульев и диванов у нас по несколько видов
 
 
 

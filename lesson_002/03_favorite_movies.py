@@ -9,3 +9,5 @@ print(my_favorite_movies[:first_comma])
 print(my_favorite_movies[last_comma:].strip(', '))
 print(my_favorite_movies[first_comma:my_favorite_movies.find(',', first_comma+1)].strip(', '))
 print(my_favorite_movies[my_favorite_movies.rfind(',', 0, last_comma):last_comma].strip(', '))
+
+# TODO: попробуйте использовать только [] и исходную строку, без дополнительных функций

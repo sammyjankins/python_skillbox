@@ -20,3 +20,5 @@ print('Рост всей семьи',
       my_family_height[3][1] +
       my_family_height[4][1]
       , 'см')
+
+# зачет!

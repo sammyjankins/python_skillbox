@@ -32,3 +32,6 @@ violator_songs_dict = {
 print(violator_songs_dict['Sweetest Perfection'] +
       violator_songs_dict['Policy of Truth'] +
       violator_songs_dict['Blue Dress'])
+
+
+# зачет!

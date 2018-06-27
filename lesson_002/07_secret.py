@@ -23,3 +23,6 @@ print(secret_message[0][3],
       secret_message[2][5:14:2],
       secret_message[3][13:6:-1],
       secret_message[4][34:9:-3])
+
+
+# зачет!

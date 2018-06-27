@@ -19,3 +19,5 @@ print(zoo.index('monkey')+1)
 print(zoo.index('lark')+1)
 
 
+
+# зачет!
