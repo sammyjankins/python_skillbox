@@ -3,11 +3,7 @@
 
 my_favorite_movies = 'Терминатор, Пятый элемент, Аватар, Чужие, Назад в будущее'
 
-first_comma = my_favorite_movies.find(',')
-last_comma = my_favorite_movies.rfind(',')
-print(my_favorite_movies[:first_comma])
-print(my_favorite_movies[last_comma:].strip(', '))
-print(my_favorite_movies[first_comma:my_favorite_movies.find(',', first_comma+1)].strip(', '))
-print(my_favorite_movies[my_favorite_movies.rfind(',', 0, last_comma):last_comma].strip(', '))
-
-# TODO: попробуйте использовать только [] и исходную строку, без дополнительных функций
+print(my_favorite_movies[:10])
+print(my_favorite_movies[12:25])
+print(my_favorite_movies[-15:])
+print(my_favorite_movies[-22:-17])
