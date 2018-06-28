@@ -76,7 +76,6 @@ print('Стул -', chairs_quantities[0] + chairs_quantities[1] + chairs_quantit
 
 
 
-
-
+# зачет!
 
 
