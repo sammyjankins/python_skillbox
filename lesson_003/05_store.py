@@ -30,11 +30,16 @@ store = {
     ],
 }
 
-# Рассчитать на какую сумму лежит каждого товара на складе
+product_quantity = 0
+product_price = 0
+for product in goods:
+    for type_of_product in store[goods[product]]:
+        product_quantity += type_of_product['quantity']
+        product_price += type_of_product['price'] * type_of_product['quantity']
+    print(product, '-', product_quantity, 'щт, стоимость', product_price, 'руб')
+    product_quantity, product_price = 0, 0
 
-# TODO вывести суммарную стоимость каждого товара на складе c помощью циклов
-# TODO то есть всего по лампам, стульям, етс.
-# TODO Формат строки вывода: "<товар> - <кол-во> шт, стоимость <общая стоимость> руб"
+
 
 
 

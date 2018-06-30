@@ -9,4 +9,13 @@
 
 A, B = 10000, 12000
 
-# TODO здесь ваш код
+scholarship_for_ten_months = A * 10
+spending_for_ten_months = B
+month = 1
+while month < 10:
+    B += B * 0.03
+    spending_for_ten_months += B
+    month += 1
+
+parents_money = round(spending_for_ten_months) - scholarship_for_ten_months
+print(parents_money)
