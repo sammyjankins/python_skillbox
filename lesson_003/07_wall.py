@@ -27,3 +27,5 @@ for x_step in range(0, 600, 100):
     points = []
 
 sd.pause()
+
+# зачет!

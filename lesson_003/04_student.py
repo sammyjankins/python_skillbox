@@ -19,3 +19,5 @@ while month < 10:
 
 parents_money = round(spending_for_ten_months) - scholarship_for_ten_months
 print(parents_money)
+
+# зачет!

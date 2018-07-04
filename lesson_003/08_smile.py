@@ -22,3 +22,5 @@ for _ in range(10):
     draw_face(random.randint(50, 550), random.randint(50, 550), sd.COLOR_ORANGE)
 
 sd.pause()
+
+# зачет!
