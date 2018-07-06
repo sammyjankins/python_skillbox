@@ -9,32 +9,12 @@
 # Номер месяца получать от пользователя следующим образом
 user_input = input("Введите, пожалуйста, номер месяца: ")
 month = int(user_input)
+months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+days = {28: 'дней', 30: 'дней', 31: 'день'}
+
 print('Вы ввели', month)
-if month == 1:
-    print('31 день')
-elif month == 2:
-    print('28 дней')
-elif month == 3:
-    print('31 день')
-elif month == 4:
-    print('30 дней')
-elif month == 5:
-    print('31 день')
-elif month == 6:
-    print('30 дней')
-elif month == 7:
-    print('31 день')
-elif month == 8:
-    print('31 день')
-elif month == 9:
-    print('30 дней')
-elif month == 10:
-    print('31 день')
-elif month == 11:
-    print('30 дней')
-elif month == 12:
-    print('31 день')
+
+if 1 <= month <= 12:
+    print(months[month-1], days[months[month-1]])
 else:
     print('Введенный номер месяца некорректен')
-
-# TODO:  теперь попробуйте использовать дикт или список вместо кучи ифов :)

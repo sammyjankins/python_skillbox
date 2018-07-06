@@ -7,19 +7,18 @@ import simple_draw as sd
 rainbow_colors = (sd.COLOR_RED, sd.COLOR_ORANGE, sd.COLOR_YELLOW, sd.COLOR_GREEN,
                   sd.COLOR_CYAN, sd.COLOR_BLUE, sd.COLOR_PURPLE)
 
-# TODO: отступы сломаны. Если раскомментировать, то в отступах останется 3 пробела.
 # width = 4
 # step = 5
 # x_start = y_start = 50
 # x_end = y_end = 550
 #
 # for color in rainbow_colors:
-#    sd.line(sd.get_point(x_start, y_start),
-#            sd.get_point(x_end, y_end),
-#            color,
-#            width)
-#   x_start += step
-#    x_end += step
+#     sd.line(sd.get_point(x_start, y_start),
+#             sd.get_point(x_end, y_end),
+#             color,
+#             width)
+#     x_start += step
+#     x_end += step
 
 
 step = 15
