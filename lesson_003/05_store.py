@@ -40,7 +40,7 @@ for product in goods:
     product_quantity, product_price = 0, 0
 
 
-
+# зачет!
 
 
 

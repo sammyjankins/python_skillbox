@@ -16,7 +16,7 @@ def bubble(point, step, color):
 # for y in range(100,301,100):
 #    for x in range(100,1100,100):
 #        point = sd.get_point(x, y)
-#       bubble(point, 5)
+#       bubble(point, 5)  # TODO: из-за этого не заработает
 
 
 for _ in range(100):

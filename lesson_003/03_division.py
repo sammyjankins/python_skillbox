@@ -14,3 +14,5 @@ while a >= b:
     result += 1
 
 print(result)
+
+# зачет!
