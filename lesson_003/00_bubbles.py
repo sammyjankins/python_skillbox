@@ -13,10 +13,10 @@ def bubble(point, step, color):
         sd.circle(center_position=point, radius=radius, width=2, color=color)
 
 
-# for y in range(100,301,100):
-#     for x in range(100,1100,100):
+# for y in range(100,301,100):  # TODO: PEP8, пробелы
+#     for x in range(100,1100,100):  # TODO: PEP8, пробелы
 #         point = sd.get_point(x, y)
-#         bubble(point, 5)
+#         bubble(point, 5)  # TODO: и это не заработает
 
 
 for _ in range(100):

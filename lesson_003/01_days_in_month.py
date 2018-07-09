@@ -18,3 +18,5 @@ if 1 <= month <= 12:
     print(months[month-1], days[months[month-1]])
 else:
     print('Введенный номер месяца некорректен')
+
+# зачет!
