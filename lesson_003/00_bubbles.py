@@ -6,17 +6,17 @@ import simple_draw as sd
 sd.resolution = (1200, 600)
 
 
-def bubble(point, step, color):
+def bubble(point, step, color=sd.COLOR_ORANGE):
     radius = 50
     for _ in range(3):
         radius += step
         sd.circle(center_position=point, radius=radius, width=2, color=color)
 
 
-# for y in range(100,301,100):  # TODO: PEP8, пробелы
-#     for x in range(100,1100,100):  # TODO: PEP8, пробелы
+# for y in range(100, 301, 100):
+#     for x in range(100, 1100, 100):
 #         point = sd.get_point(x, y)
-#         bubble(point, 5)  # TODO: и это не заработает
+#         bubble(point, 5)
 
 
 for _ in range(100):
