@@ -71,3 +71,5 @@ pentagon(sd.get_point(100, 100), 30, 100)
 hexagon(sd.get_point(400, 100), 30, 100)
 
 sd.pause()
+
+# зачет!

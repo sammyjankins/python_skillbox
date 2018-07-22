@@ -88,3 +88,5 @@ pentagon(sd.get_point(100, 100), 30, 100, color)
 hexagon(sd.get_point(400, 100), 30, 100, color)
 
 sd.pause()
+
+# зачет!

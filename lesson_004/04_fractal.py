@@ -73,3 +73,5 @@ root_point = sd.get_point(400, 30)
 draw_bunches(start_point=root_point, angle=90, length=150)
 
 sd.pause()
+
+# зачет!
