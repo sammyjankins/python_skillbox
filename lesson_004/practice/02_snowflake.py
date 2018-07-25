@@ -19,14 +19,14 @@ while True:
     sd.snowflake(center=point, length=50)
     y -= 10
     if y < 50:
-       break
+        break
     x = x + 10
 
     point2 = sd.get_point(x2, y2)
     sd.snowflake(center=point2, length=30)
     y2 -= 10
     if y2 < 50:
-       break
+        break
     x2 = x2 + 20
 
     sd.sleep(0.1)
