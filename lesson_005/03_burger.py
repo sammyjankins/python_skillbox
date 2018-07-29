@@ -43,7 +43,7 @@ def jack_daniels_burger():
     my_burger.add_bacon()
     my_burger.add_bun()
     my_burger.eat(burger_name)
-    pass
+    pass  # TODO: зачем?
 
 
 double_cheeseburger()

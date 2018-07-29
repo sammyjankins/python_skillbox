@@ -4,6 +4,8 @@ import simple_draw as sd
 
 N = 20
 
+# TODO: эти списки используются только в init_snow_params
+# TODO: лучше прямо там из объявлять
 x_levels = []
 y_levels = []
 lengths = []

@@ -18,3 +18,5 @@ from district.soviet_street.house2.room2 import folks as f8
 population = f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8
 
 print("На районе живут:", ", ".join(population))
+
+# зачет!
