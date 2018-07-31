@@ -10,13 +10,7 @@ import room_2
 
 def print_roommates(module):
     print("В комнате", module.__name__, "живут:", end=" ")
-    # TODO: проще заюзать .join()
-    for i, mate in enumerate(module.folks):
-        if i + 1 < len(module.folks):
-            print(mate, end=", "),
-        else:
-            print(mate, end="\n")
-
+    print(", ".join(module.folks))
 
 print_roommates(room_1)
 print_roommates(room_2)

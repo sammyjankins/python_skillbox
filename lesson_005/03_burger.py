@@ -20,7 +20,7 @@ import my_burger
 
 def double_cheeseburger():
     print("\n*** РЕЦЕПТ ДВОЙНОГО ЧИЗБУРГЕРА ***\n")
-    my_burger.add_bun(half=1)
+    my_burger.add_bun(bun_half=1)
     my_burger.add_mayo()
     my_burger.add_cutlet()
     my_burger.add_cheese()
@@ -33,7 +33,7 @@ def double_cheeseburger():
 def jack_daniels_burger():
     print("\n*** РЕЦЕПТ БУРГЕРА \"ДЖЕК ДЭНИЭЛС\" ***\n")
     burger_name = "бургером \"Джек Дэниэлс\""
-    my_burger.add_bun(half=1)
+    my_burger.add_bun(bun_half=1)
     my_burger.add_onion()
     my_burger.add_tomato()
     my_burger.add_pickle()
@@ -43,7 +43,6 @@ def jack_daniels_burger():
     my_burger.add_bacon()
     my_burger.add_bun()
     my_burger.eat(burger_name)
-    pass  # TODO: зачем?
 
 
 double_cheeseburger()

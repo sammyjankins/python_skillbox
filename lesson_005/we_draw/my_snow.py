@@ -4,16 +4,13 @@ import simple_draw as sd
 
 N = 20
 
-# TODO: эти списки используются только в init_snow_params
-# TODO: лучше прямо там из объявлять
-x_levels = []
-y_levels = []
-lengths = []
-delta_y = []
-factors = []
-
 
 def init_snow_params(x_max, y_max, n=N):
+    x_levels = []
+    y_levels = []
+    lengths = []
+    delta_y = []
+    factors = []
     for _ in range(n):
         x_levels.append(sd.random_number(0, x_max - 6 * x_max // 10))
         y_levels.append(sd.random_number(y_max - y_max // 5, y_max))

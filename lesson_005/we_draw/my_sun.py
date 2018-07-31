@@ -16,7 +16,7 @@ generate_rays(0, 0, 0)
 def draw_sun(x, y, size):
     center = sd.get_point(x, y)
     for i in range(10):
-        sd.line(center, ray_list[i - 1], sd.background_color, 5)  # TODO: почему i - 1?
+        sd.line(center, ray_list[i], sd.background_color, 5)
     sd.circle(center, size, width=0)
     ray_list.clear()
     generate_rays(x, y, size)
