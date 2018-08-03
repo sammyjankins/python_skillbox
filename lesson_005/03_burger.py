@@ -47,3 +47,4 @@ def jack_daniels_burger():
 
 double_cheeseburger()
 jack_daniels_burger()
+# зачет!
