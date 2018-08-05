@@ -34,7 +34,45 @@
 #  вывод результата проверки
 #  если игрок выйграл - показать количество ходов и вопрос "Хотите еще партию?"
 
-# TODO здесь ваш код...
+from bulls_and_cows import init_number, check_numbers
+from termcolor import cprint, colored
+
+# сохранение загаданного числа в hidden_number и инициализация счетчика ходов
+hidden_number = init_number()
+rounds_count = 0
+
+print("Добро пожаловать в игру \"Быки и коровы\"!")
+print("Игра загадала число, время угадывать!")
+while True:
+    rounds_count += 1
+    user_input = input("Введите 4-значное число: ")
+
+    # проверка на корректность ввода
+    while (len(user_input) is not 4) or (not user_input.isdigit()):
+        user_input = input("Некорректный ввод! Введите 4-значное число: ")
+
+    check_result = check_numbers(hidden_number, user_input)
+    if check_result["bulls"] is 4:
+        print("Это победа!")
+        if rounds_count < 10:
+            print("Количество ходов -",
+                  rounds_count,
+                  "! Вы наверное гений! У вас АйКью, случайно, не 160?!\n",
+                  end="")
+            ans = input("Если да, то не будет ли вам скучно сыграть еще одну партию(Y/N)?")
+        else:
+            print(rounds_count, "ходов! Неплохо, неплохо!")
+            ans = input("Не хотели бы вы сыграть еще одну партию(Y/N)?")
+        if ans is 'Y':
+            hidden_number = init_number()
+            rounds_count = 0
+        elif ans is 'N':
+            break
+        else:
+            print("Некорректный ввод! Истолкуем это как \"нет\", досвидания!")
+            break
+    else:
+        print("быки -", check_result["bulls"], ", коровы -", check_result["cows"])
 
 # Усложненное задание (делать по желанию)
 
