@@ -14,3 +14,5 @@ def print_roommates(module):
 
 print_roommates(room_1)
 print_roommates(room_2)
+
+# зачет! 
