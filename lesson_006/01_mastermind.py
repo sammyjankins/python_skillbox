@@ -41,38 +41,53 @@ from termcolor import cprint, colored
 hidden_number = init_number()
 rounds_count = 0
 
-print("Добро пожаловать в игру \"Быки и коровы\"!")
-print("Игра загадала число, время угадывать!")
+cprint("** Добро пожаловать в игру \"Быки и коровы\"!", "green", "on_grey", attrs=["bold"])
+cprint("** Игра загадала число, время угадывать!", "green", "on_grey", attrs=["bold"])
 while True:
     rounds_count += 1
-    user_input = input("Введите 4-значное число: ")
+    print((colored("** Введите 4-значное число: ", "yellow", "on_grey", attrs=["bold"])), end="")
+    user_input = input()
 
     # проверка на корректность ввода
     while (len(user_input) is not 4) or (not user_input.isdigit()):
-        user_input = input("Некорректный ввод! Введите 4-значное число: ")
+        print((colored("** Некорректный ввод! Введите 4-значное число: ",
+                       "red",
+                       "on_grey",
+                       attrs=["bold"])), end="")
+        user_input = input()
 
     check_result = check_numbers(hidden_number, user_input)
     if check_result["bulls"] is 4:
-        print("Это победа!")
+        cprint("** Это победа!", "green", "on_grey", attrs=["bold"])
+        print((colored("** Количество ходов - ", "green", "on_grey", attrs=["bold"])), end="")
+        print((colored(rounds_count, "green", "on_grey", attrs=["bold"])))
         if rounds_count < 10:
-            print("Количество ходов -",
-                  rounds_count,
-                  "! Вы наверное гений! У вас АйКью, случайно, не 160?!\n",
-                  end="")
-            ans = input("Если да, то не будет ли вам скучно сыграть еще одну партию(Y/N)?")
+            print((colored("** Вы наверное гений! У вас АйКью, случайно, не 160?!",
+                           "green",
+                           "on_grey",
+                           attrs=["bold"])))
+            cprint("** Если да, то не будет ли вам скучно сыграть еще одну партию(Y/N)?",
+                   "green",
+                   "on_grey",
+                   attrs=["bold"])
+            ans = input()
         else:
-            print(rounds_count, "ходов! Неплохо, неплохо!")
-            ans = input("Не хотели бы вы сыграть еще одну партию(Y/N)?")
+            cprint("** Не хотели бы вы сыграть еще одну партию(Y/N)?", "red", "on_grey", attrs=["bold"])
+            ans = input()
         if ans is 'Y':
             hidden_number = init_number()
             rounds_count = 0
         elif ans is 'N':
             break
         else:
-            print("Некорректный ввод! Истолкуем это как \"нет\", досвидания!")
+            cprint("** Некорректный ввод!", "red", "on_grey", attrs=["bold"])
+            cprint("** Истолкуем это как \"нет\", досвидания!", "green", "on_grey", attrs=["bold"])
             break
     else:
-        print("быки -", check_result["bulls"], ", коровы -", check_result["cows"])
+        print((colored("** Быки - ", "yellow", "on_grey", attrs=["bold"])), end="")
+        print((colored(check_result["bulls"], "yellow", "on_grey", attrs=["bold"])))
+        print((colored("** Коровы - ", "yellow", "on_grey", attrs=["bold"])), end="")
+        print((colored(check_result["cows"], "yellow", "on_grey", attrs=["bold"])))
 
 # Усложненное задание (делать по желанию)
 
