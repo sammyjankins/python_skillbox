@@ -41,6 +41,10 @@ from termcolor import cprint, colored
 hidden_number = init_number()
 rounds_count = 0
 
+# TODO: везде, где сравниваются два значения, нужно использовать операторы ==, !=  и т. д.
+# TODO: is лучше использовать пока что только при сравнении с None
+# TODO: ответ на вопрос "а что такого то?" хорошо иллюстрирует такой пример: print(1000 is 10 ** 3)
+
 cprint("** Добро пожаловать в игру \"Быки и коровы\"!", "green", "on_grey", attrs=["bold"])
 cprint("** Игра загадала число, время угадывать!", "green", "on_grey", attrs=["bold"])
 while True:
@@ -70,10 +74,10 @@ while True:
                    "green",
                    "on_grey",
                    attrs=["bold"])
-            ans = input()
+            ans = input()  # TODO: раз
         else:
             cprint("** Не хотели бы вы сыграть еще одну партию(Y/N)?", "red", "on_grey", attrs=["bold"])
-            ans = input()
+            ans = input()  # TODO: два. Можно один раз спросить Y/N, перед проверкой, которая на следующей строчке
         if ans is 'Y':
             hidden_number = init_number()
             rounds_count = 0
@@ -88,6 +92,9 @@ while True:
         print((colored(check_result["bulls"], "yellow", "on_grey", attrs=["bold"])))
         print((colored("** Коровы - ", "yellow", "on_grey", attrs=["bold"])), end="")
         print((colored(check_result["cows"], "yellow", "on_grey", attrs=["bold"])))
+
+# TODO: ваша программа может загадать число с лидирующим нулём. Баг маленький, но не очень очевидный :) Попробуйте отыскать
+
 
 # Усложненное задание (делать по желанию)
 

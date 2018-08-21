@@ -38,12 +38,13 @@ def move_snowflakes():
 
 # сделал список из индексов дошедших до дна снежинок, чтобы их число не расло в
 # геометрической прогрессии ¯\_(ツ)_/¯
+# TODO: так они всё равно будут копиться в blizzard. Можно их оттуда просто выкидывать
 bottomed = []
 
 
 def bottom_count():
     count = 0
-    for i,y in enumerate(blizzard['y']):
+    for i,y in enumerate(blizzard['y']):  # TODO: пробел
         if y < 20:
             if i not in bottomed:
                 count += 1

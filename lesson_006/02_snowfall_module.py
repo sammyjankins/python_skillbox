@@ -19,7 +19,7 @@ while True:
     sd.clear_screen()
     snowfall.draw_snowflakes(sd.COLOR_WHITE)
     snowfall.move_snowflakes()
-    snowfall.draw_snowflakes(sd.COLOR_WHITE)
+    snowfall.draw_snowflakes(sd.COLOR_WHITE)  # TODO: зачем второй раз?
     count = snowfall.bottom_count()
     if count:
         snowfall.add_snowflakes(count)
@@ -28,3 +28,6 @@ while True:
         break
 
 sd.pause()
+
+# TODO: доп задание (если не лень)
+# TODO: убрать мерцание. Можно сделать функцию отрисовки одной снежинки и вызывать её внутри move_snowflakes, например.
