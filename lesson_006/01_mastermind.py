@@ -41,9 +41,7 @@ from termcolor import cprint, colored
 hidden_number = init_number()
 rounds_count = 0
 
-# TODO: везде, где сравниваются два значения, нужно использовать операторы ==, !=  и т. д.
-# TODO: is лучше использовать пока что только при сравнении с None
-# TODO: ответ на вопрос "а что такого то?" хорошо иллюстрирует такой пример: print(1000 is 10 ** 3)
+# TODO: сам на днях прочитал про суть оператора is и начал параноить немного, и видно не зря)
 
 cprint("** Добро пожаловать в игру \"Быки и коровы\"!", "green", "on_grey", attrs=["bold"])
 cprint("** Игра загадала число, время угадывать!", "green", "on_grey", attrs=["bold"])
@@ -53,7 +51,7 @@ while True:
     user_input = input()
 
     # проверка на корректность ввода
-    while (len(user_input) is not 4) or (not user_input.isdigit()):
+    while (len(user_input) != 4) or (not user_input.isdigit()):
         print((colored("** Некорректный ввод! Введите 4-значное число: ",
                        "red",
                        "on_grey",
@@ -61,7 +59,7 @@ while True:
         user_input = input()
 
     check_result = check_numbers(hidden_number, user_input)
-    if check_result["bulls"] is 4:
+    if check_result["bulls"] == 4:
         cprint("** Это победа!", "green", "on_grey", attrs=["bold"])
         print((colored("** Количество ходов - ", "green", "on_grey", attrs=["bold"])), end="")
         print((colored(rounds_count, "green", "on_grey", attrs=["bold"])))
@@ -74,14 +72,13 @@ while True:
                    "green",
                    "on_grey",
                    attrs=["bold"])
-            ans = input()  # TODO: раз
         else:
             cprint("** Не хотели бы вы сыграть еще одну партию(Y/N)?", "red", "on_grey", attrs=["bold"])
-            ans = input()  # TODO: два. Можно один раз спросить Y/N, перед проверкой, которая на следующей строчке
-        if ans is 'Y':
+        ans = input()
+        if ans == 'Y':
             hidden_number = init_number()
             rounds_count = 0
-        elif ans is 'N':
+        elif ans == 'N':
             break
         else:
             cprint("** Некорректный ввод!", "red", "on_grey", attrs=["bold"])
@@ -92,9 +89,6 @@ while True:
         print((colored(check_result["bulls"], "yellow", "on_grey", attrs=["bold"])))
         print((colored("** Коровы - ", "yellow", "on_grey", attrs=["bold"])), end="")
         print((colored(check_result["cows"], "yellow", "on_grey", attrs=["bold"])))
-
-# TODO: ваша программа может загадать число с лидирующим нулём. Баг маленький, но не очень очевидный :) Попробуйте отыскать
-
 
 # Усложненное задание (делать по желанию)
 

@@ -16,18 +16,13 @@ import snowfall
 
 snowfall.create_snowflakes(20)
 while True:
-    sd.clear_screen()
-    snowfall.draw_snowflakes(sd.COLOR_WHITE)
     snowfall.move_snowflakes()
-    snowfall.draw_snowflakes(sd.COLOR_WHITE)  # TODO: зачем второй раз?
     count = snowfall.bottom_count()
     if count:
-        snowfall.add_snowflakes(count)
+        snowfall.create_snowflakes(
+            count)  # add_snowflakes решил упразднить, т.к. create_snowflakes по сути это и делает
     sd.sleep(0.1)
     if sd.user_want_exit():
         break
 
 sd.pause()
-
-# TODO: доп задание (если не лень)
-# TODO: убрать мерцание. Можно сделать функцию отрисовки одной снежинки и вызывать её внутри move_snowflakes, например.

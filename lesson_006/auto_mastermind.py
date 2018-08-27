@@ -21,7 +21,7 @@ while True:
     print((colored("** Компьютер пробует число - ", "yellow", "on_grey", attrs=["bold"])), end="")
     print((colored(attempt, "yellow", "on_grey", attrs=["bold"])))
     sleep(0.1)
-    if check_result["bulls"] is 4:
+    if check_result["bulls"] == 4:
         cprint("** Это победа!", "green", "on_grey", attrs=["bold"])
         print((colored("** Количество ходов - ", "green", "on_grey", attrs=["bold"])), end="")
         print((colored(rounds_count, "green", "on_grey", attrs=["bold"])))
@@ -31,4 +31,4 @@ while True:
         print((colored(check_result["bulls"], "yellow", "on_grey", attrs=["bold"])))
         print((colored("** Коровы - ", "yellow", "on_grey", attrs=["bold"])), end="")
         print((colored(check_result["cows"], "yellow", "on_grey", attrs=["bold"])))
-    sleep(0.1)
+    sleep(1)
