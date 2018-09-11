@@ -31,12 +31,12 @@ def init_versions(number, vers=0):
 def get_ganados(ganados=None):
     # заполнение массива вариантов в начале игры
     global bunch_of_numbers
-    if ganados is None:
+    if ganados is None:  # TODO: это надо унести в отдельную функцию для инициализации изначального списка
         for i in range(1022, 9877):
             number = str(i)
             if len(set(number)) == len(number):
                 bunch_of_numbers.append(number)
-    else:
+    else:  # TODO: в этой функции пусть останется только то, что после этого else
 
         # Когда натыкаемся на число, дающее поголовье в количестве 4-х особей, заполняем список versions
         # комбинациями из этих 4-х чисел. Далее функция try_number замечает что он не пустой и перебирает его.
@@ -46,7 +46,7 @@ def get_ganados(ganados=None):
                 init_versions(last_attempt, 1)
 
         # Заполняем новый массив вариантов из старого комбинациями, не содержащими ненужных чисел.
-        elif check_sum == 0:
+        elif check_sum == 0:  # TODO: всё, что в этом условии, в отдельную функцию, пусть она возвращает new_bunch
             new_bunch = []
             for number in bunch_of_numbers:
                 if check_sets(number, last_attempt) == 4:  # проверяем что в очередном числе нет ни одного ненужного
@@ -59,7 +59,7 @@ def get_ganados(ganados=None):
         # собирал это добро в список, то потом при удалении вариантов из bunch была ошибка при попытке удаления
         # того же числа несколько раз. Потом понял, что можно было просто проверять на if number in bunch_of_numbers
         # но решил оставить решение с сетом.
-        elif ganados["bulls"] == 0:
+        elif ganados["bulls"] == 0:  # TODO: и тут
             bad_options = set()
             for letter in last_attempt:
                 for number in bunch_of_numbers:
@@ -71,7 +71,7 @@ def get_ganados(ganados=None):
         # Случай, когда поголовье не 0, но и не 4, при этои имеем хотя бы одного быка(значит в комбинации есть хотя
         #  бы одно ненужное число). Тут можно удалить из множества все комбинации из этих 4-х цифр. Немножно упростил
         #  блок и изменил функцию init_versions
-        else:
+        else:  # TODO: и тут
             bad_options = init_versions(last_attempt)
             for number in bad_options:
                 if number in bunch_of_numbers:
@@ -85,4 +85,8 @@ def try_number():
         last_attempt = bunch_of_numbers[randint(0, len(bunch_of_numbers) - 1)]
     else:
         last_attempt = versions.pop()
+        # TODO: о есть есть два источника чисел. bunch_of_numbers и versions.
+        # TODO: Но из versions вы не вычищаете значения, когда check_sum == 0 и где не 0, не 4 и хотя бы один бык
+        # TODO: мб где эти два списка синхронизируются, и я не увидел. Если мне не показалось,
+        # TODO: попробуйте использовать один пул значений и по ходу выполнения его сокращать
     return last_attempt

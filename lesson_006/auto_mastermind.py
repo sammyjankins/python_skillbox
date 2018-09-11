@@ -16,7 +16,7 @@ while True:
     rounds_count += 1
     attempt = try_number()
     check_result = check_numbers(hidden_number, attempt)
-    check_sum = check_result["bulls"] + check_result["cows"]
+    check_sum = check_result["bulls"] + check_result["cows"]  # TODO: check_sum нигде не используется
     get_ganados(check_result)
     print((colored("** Компьютер пробует число - ", "yellow", "on_grey", attrs=["bold"])), end="")
     print((colored(attempt, "yellow", "on_grey", attrs=["bold"])))
