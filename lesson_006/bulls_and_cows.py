@@ -7,7 +7,7 @@ def init_number():
     while len(output) != 4:
         output.add(str(randint(0, 9)))
     output = list(output)
-    if output[0] == '0':  # TODO проверка была на равенство числу 0, а надо было на равенство символу >_<
+    if output[0] == '0':
         output[0], output[1] = output[1], output[0]
     return output
 
