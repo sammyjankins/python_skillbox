@@ -45,7 +45,7 @@ def bottom_count():
     for i, y in enumerate(blizzard['y']):
         if y < 20:
             draw_snowflake(sd.background_color, i - count)
-            for _ in blizzard:  # TODO: счетчик используется внутри цикла. Надо его назвать нормально.
-                blizzard[_].pop(i - count)
+            for flake in blizzard:
+                blizzard[flake].pop(i - count)
             count += 1
     return count
