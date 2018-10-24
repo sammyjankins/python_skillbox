@@ -3,6 +3,7 @@
 import simple_draw as sd
 
 sd.resolution = res = (900, 600)
+sd.background_color = sd.COLOR_BLACK
 
 
 # Шаг 1: Реализовать падение снежинки через класс. Внести в методы:
@@ -12,10 +13,10 @@ sd.resolution = res = (900, 600)
 
 
 class Snowflake:
-    snow_count = 0
+    flakes = []
+    level = 0    # будет сугроб
 
     def __init__(self):
-        Snowflake.snow_count += 1
         self.x = sd.randint(0, res[0])
         self.y = res[1]
         self.length = sd.randint(5, 50)
@@ -25,6 +26,8 @@ class Snowflake:
         self.factor_b = sd.randint(2, 5) / 10
         self.factor_c = sd.randint(40, 70)
         self.color = sd.COLOR_WHITE
+        self.skip = False                      # чтобы не учитывалась каждый раз как только что упавшая
+        Snowflake.flakes.append(self)
 
     def clear_previous_picture(self):
         self.color = sd.background_color
@@ -44,33 +47,58 @@ class Snowflake:
                      self.factor_c)
 
     def can_fall(self):
-        return True if self.y >= 0 else False
+        if self.y > Snowflake.level:
+            return True
+        else:
+            return False
 
 
-flake = Snowflake()
-
-while True:
-    flake.clear_previous_picture()
-    flake.move()
-    flake.draw()
-    if not flake.can_fall():
-        break
-    sd.sleep(0.1)
-    if sd.user_want_exit():
-        break
-
-# шаг 2: создать снегопад - список объектов Снежинка в отдельном списке, обработку примерно так:
-# flakes = get_flakes(count=N)  # создать список снежинок
+# flake = Snowflake()
+#
 # while True:
-#     for flake in flakes:
-#         flake.clear_previous_picture()
-#         flake.move()
-#         flake.draw()
-#     fallen_flakes = get_fallen_flakes()  # подчитать сколько снежинок уже упало
-#     if fallen_flakes:
-#         append_flakes(count=fallen_flakes)  # добавить еще сверху
+#     flake.clear_previous_picture()
+#     flake.move()
+#     flake.draw()
+#     if not flake.can_fall():
+#         break
 #     sd.sleep(0.1)
 #     if sd.user_want_exit():
 #         break
 
+
+def get_flakes(count=10):
+    for _ in range(count):
+        Snowflake()
+
+
+def get_fallen_flakes():
+    fallen_count = 0
+    for flake in Snowflake.flakes:
+        if not flake.skip:
+            if not flake.can_fall():
+                fallen_count += 1
+                flake.skip = not flake.skip
+    return fallen_count
+
+
+get_flakes(25)
+
+# сугроб увеличивается со временем
+
+while True:
+    for flake in Snowflake.flakes:
+        if not flake.skip:
+            flake.clear_previous_picture()
+            flake.move()
+            flake.draw()
+    fallen_flakes = get_fallen_flakes()
+    if fallen_flakes:
+        get_flakes(count=fallen_flakes)
+        Snowflake.level += fallen_flakes / 5
+    sd.sleep(0.1)
+    if sd.user_want_exit():
+        break
+
 sd.pause()
+
+
