@@ -34,7 +34,7 @@ class House:
     def __init__(self):
         self.food = 50
         self.cat_food = 0
-        self.cat_bowl
+        self.cat_bowl = 0
         self.mess = 0  # поменял грязь на беспорядок, надеюсь не критично
         self.occupants = []
 
@@ -151,7 +151,6 @@ class Man:
             self.house.cat_food -= 50
             print('Миска пуста. {} заполнил кошачью миску до отвала. Кошачьей еды осталось {}'.format(
                 self.name, self.house.cat_food))
-            return False
             if self.house.cat_food == 0:
                 return self.buy_cat_food()
         elif self.house.cat_food > 0:
@@ -196,6 +195,36 @@ class Cat:
     def __str__(self):
         return 'Я - кот по имени {}, сытость {}'.format(
             self.name, self.fullness)
+
+    def eat(self):
+        if self.house.cat_bowl >= 10:
+            cprint('Кот {} поел'.format(self.name), color='yellow')
+            self.fullness += 20
+            self.house.cat_bowl -= 10
+        else:
+            cprint('Кот {} хотел поесть, но в миске нет еды'.format(self.name), color='red')
+
+    def sleep(self):
+        self.fullness -= 10
+        cprint('Кот {} проспал весь день'.format(self.name), color='red')
+
+    def tear_wallpaper(self):
+        self.fullness -= 10
+        self.house.mess += 5
+        cprint('Кот {} весь день драл обои'.format(self.name), color='red')
+
+    def act(self):
+        if self.fullness <= 0:
+            cprint('{} умер...'.format(self.name), color='red')
+            return
+        dice = randint(1, 2)
+        if self.fullness < 20:
+            self.eat()
+        elif dice == 1:
+            self.sleep()
+        elif dice == 2:
+            self.tear_wallpaper()
+
 
 # Усложненное задание (делать по желанию)
 # Создать несколько (2-3) котов и подселить их в дом к человеку.
