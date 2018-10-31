@@ -57,7 +57,7 @@ class Man:
         self.money = 0
 
     def __str__(self):
-        return 'Я - {}, сытость {}, денег'.format(
+        return 'Я - {}, сытость {}, денег {}'.format(
             self.name, self.fullness, self.money)
 
     def eat(self):
@@ -225,6 +225,18 @@ class Cat:
         elif dice == 2:
             self.tear_wallpaper()
 
+
+my_sweet_home = House()
+human = Man()
+human.go_to_the_house(my_sweet_home)
+for day in range(1, 366):
+    print('================ день {} =================='.format(day))
+    for person in my_sweet_home.occupants:
+        person.act()
+    print('--- в конце дня ---')
+    for person in my_sweet_home.occupants:
+        print(person)
+    print(my_sweet_home)
 
 # Усложненное задание (делать по желанию)
 # Создать несколько (2-3) котов и подселить их в дом к человеку.
