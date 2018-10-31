@@ -47,7 +47,6 @@ class House:
 
 
 class Man:
-
     names = ['Гарри', 'Джеймс', 'Генри']
 
     def __init__(self):
@@ -83,10 +82,8 @@ class Man:
         elif activity == 2:
             cprint('{} гулял целый день'.format(self.name), color='green')
             self.fullness -= 20
-            # if randint(1,2) == 1:
-            #     cat = Cat()
-            #     self.house.occupants.append(cat)
-            #     cprint('. Пока гулял, подобрал кота и назвал его - {}'.format(self.name, cat.name), color='green')
+            if randint(1, 2) == 1:
+                self.get_a_cat()
         elif activity == 3:
             cprint('{} изучал Python целый день'.format(self.name), color='green')
             self.fullness -= 10
@@ -125,6 +122,28 @@ class Man:
             self.eat()
         else:
             self.leisure()
+
+    def get_a_cat(self):
+        cat = Cat()
+        self.house.occupants.append(cat)
+        cprint('. Пока гулял, подобрал кота и назвал его - {}'.format(self.name, cat.name), color='green')
+
+
+class Cat:
+    cat_names = ['Майкл', 'Эдди', 'Роджер', 'Винсент', 'Дуглас', 'Леонард', 'Уолтер',
+                 'Джозеф', 'Джаспер', 'Эндрю', 'Ричард']
+
+    def __init__(self):
+        """Когда называем кота - чистим список от его имени"""
+        self.name = choice(Cat.cat_names)
+        Cat.cat_names.remove(self.name)
+        self.fullness = 50
+        self.house = None
+
+    def __str__(self):
+        return 'Я - кот по имени {}, сытость {}'.format(
+            self.name, self.fullness)
+
 
 # Усложненное задание (делать по желанию)
 # Создать несколько (2-3) котов и подселить их в дом к человеку.
