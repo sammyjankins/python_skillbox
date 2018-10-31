@@ -34,6 +34,7 @@ class House:
     def __init__(self):
         self.food = 50
         self.cat_food = 0
+        self.cat_bowl
         self.mess = 0  # поменял грязь на беспорядок, надеюсь не критично
         self.occupants = []
 
@@ -106,11 +107,12 @@ class Man:
         cprint('{} Вьехал в дом'.format(self.name), color='cyan')
 
     def act(self):
+        worked = self.check_bowl()
         if self.fullness <= 0:
             cprint('{} умер...'.format(self.name), color='red')
             return
         dice = randint(1, 6)
-        if self.fullness < 20:
+        if self.fullness < 20 and not worked:
             self.eat()
         elif self.house.food < 10:
             self.shopping()
@@ -128,6 +130,49 @@ class Man:
         self.house.occupants.append(cat)
         cprint('. Пока гулял, подобрал кота и назвал его - {}'.format(self.name, cat.name), color='green')
 
+    def check_bowl(self):
+
+        """В доме есть кошачья миска, человек проверяет ее каждый день и наполняет,
+        если пустая (feed_pets()). Если еда кончается, покупает (buy_cat_food()),
+        либо идет на работу если нет денег (work()), в таком случае это считается
+        действием, на которое тратится день."""
+
+        if self.house.cat_bowl >= 10:
+            print('{} проверил кошачью миску. В миске есть {} кошачьей еды.'.format(self.name, self.house.cat_bowl))
+            return False
+        else:
+            return self.feed_pets()
+
+    def feed_pets(self):
+        if self.house.cat_food >= 50:
+            self.house.cat_bowl += 50
+            self.house.cat_food -= 50
+            print('Миска пуста. {} заполнил кошачью миску до отвала. Кошачьей еды осталось {}'.format(
+                self.name, self.house.cat_food))
+            return False
+            if self.house.cat_food == 0:
+                return self.buy_cat_food()
+        elif self.house.cat_food > 0:
+            self.house.cat_bowl += self.house.cat_food
+            self.house.cat_food = 0
+            print('Миска пуста. {} заполнил кошачью миску оставшейся кошачьей едой. В миске теперь {} еды'.format(
+                self.name, self.house.cat_bowl))
+            return self.buy_cat_food()
+        else:
+            return self.buy_cat_food()
+
+    def buy_cat_food(self):
+        if self.money >= 50:
+            self.money -= 50
+            self.house.cat_food += 50
+            print('{} купил кошачьей еды. Теперь денег {}, а кошачьей еды {}'.format(
+                self.name, self.money, self.house.cat_food))
+            return False
+        else:
+            print('На кошачью еду нет денег, {} пошел на работу'.format(self.name))
+            self.work()
+            return True
+
 
 class Cat:
     cat_names = ['Майкл', 'Эдди', 'Роджер', 'Винсент', 'Дуглас', 'Леонард', 'Уолтер',
@@ -143,7 +188,6 @@ class Cat:
     def __str__(self):
         return 'Я - кот по имени {}, сытость {}'.format(
             self.name, self.fullness)
-
 
 # Усложненное задание (делать по желанию)
 # Создать несколько (2-3) котов и подселить их в дом к человеку.
