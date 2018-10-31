@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from random import randint
-
 # Доработать практическую часть урока lesson_007/python_snippets/08_practice.py
 
 # Необходимо создать класс кота. У кота есть аттрибуты - сытость и дом (в котором он живет).
@@ -55,6 +53,7 @@ class Man:
         self.fullness = 50
         self.house = None
         self.money = 0
+        self.is_alive = True
 
     def __str__(self):
         return 'Я - {}, сытость {}, денег {}'.format(
@@ -82,7 +81,7 @@ class Man:
             self.fullness -= 10
         elif activity == 2:
             cprint('{} гулял целый день'.format(self.name), color='green')
-            self.fullness -= 20
+            self.fullness -= 10
             if randint(1, 2) == 1:
                 self.get_a_cat()
         elif activity == 3:
@@ -107,30 +106,35 @@ class Man:
         cprint('{} Вьехал в дом'.format(self.name), color='cyan')
 
     def act(self):
-        worked = self.check_bowl()
+        worked = False
+        if len(self.house.occupants) > 1:
+            worked = self.check_bowl()
         if self.fullness <= 0:
-            cprint('{} умер...'.format(self.name), color='red')
+            cprint('Сильный и независимый {} умер...'.format(self.name), color='red')
+            self.is_alive = False
             return
         dice = randint(1, 6)
-        if self.fullness < 20 and not worked:
-            self.eat()
-        elif self.house.food < 10:
-            self.shopping()
-        elif self.money < 50:
-            self.work()
-        elif self.house.mess >= 100:
-            self.clean_house()
-        elif dice == 1:
-            self.work()
-        elif dice == 2:
-            self.eat()
-        else:
-            self.leisure()
+        if not worked:
+            if self.fullness < 20:
+                self.eat()
+            elif self.house.food < 10:
+                self.shopping()
+            elif self.money < 50:
+                self.work()
+            elif self.house.mess >= 100:
+                self.clean_house()
+            elif dice == 1:
+                self.work()
+            elif dice == 2:
+                self.eat()
+            else:
+                self.leisure()
 
     def get_a_cat(self):
         cat = Cat()
         self.house.occupants.append(cat)
-        cprint('. Пока гулял, подобрал кота и назвал его - {}'.format(self.name, cat.name), color='green')
+        cat.house = self.house
+        cprint('Пока гулял, подобрал кота и назвал его - {}'.format(cat.name), color='green')
 
     def check_bowl(self):
 
@@ -191,6 +195,7 @@ class Cat:
         Cat.cat_names.remove(self.name)
         self.fullness = 50
         self.house = None
+        self.is_alive = True
 
     def __str__(self):
         return 'Я - кот по имени {}, сытость {}'.format(
@@ -216,6 +221,7 @@ class Cat:
     def act(self):
         if self.fullness <= 0:
             cprint('{} умер...'.format(self.name), color='red')
+            self.is_alive = False
             return
         dice = randint(1, 2)
         if self.fullness < 20:
@@ -229,14 +235,18 @@ class Cat:
 my_sweet_home = House()
 human = Man()
 human.go_to_the_house(my_sweet_home)
+its_ok = True
 for day in range(1, 366):
-    print('================ день {} =================='.format(day))
-    for person in my_sweet_home.occupants:
-        person.act()
-    print('--- в конце дня ---')
-    for person in my_sweet_home.occupants:
-        print(person)
-    print(my_sweet_home)
+    if its_ok:
+        print('================ день {} =================='.format(day))
+        for person in my_sweet_home.occupants:
+            person.act()
+        print('--- в конце дня ---')
+        for person in my_sweet_home.occupants:
+            print(person)
+            if not person.is_alive:
+                its_ok = False
+        print(my_sweet_home)
 
 # Усложненное задание (делать по желанию)
 # Создать несколько (2-3) котов и подселить их в дом к человеку.
