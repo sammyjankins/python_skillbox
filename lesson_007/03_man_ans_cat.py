@@ -118,6 +118,8 @@ class Man:
             self.shopping()
         elif self.money < 50:
             self.work()
+        elif self.house.mess >= 100:
+            self.clean_house()
         elif dice == 1:
             self.work()
         elif dice == 2:
@@ -172,6 +174,12 @@ class Man:
             print('На кошачью еду нет денег, {} пошел на работу'.format(self.name))
             self.work()
             return True
+
+    def clean_house(self):
+        self.house.mess -= 100
+        self.fullness -= 20
+        print('{} прибрался. Уровень беспорядка дома - {}, сытость - {}'.format(
+            self.name, self.house.mess, self.fullness))
 
 
 class Cat:
