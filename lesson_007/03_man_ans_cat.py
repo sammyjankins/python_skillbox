@@ -87,7 +87,7 @@ class Man:
         elif activity == 3:
             cprint('{} изучал Python целый день'.format(self.name), color='green')
             self.fullness -= 10
-        elif activity == 4:
+        else:
             cprint('{} играл в The Sims целый день'.format(self.name), color='green')
             self.fullness -= 10
 
@@ -106,15 +106,15 @@ class Man:
         cprint('{} Вьехал в дом'.format(self.name), color='cyan')
 
     def act(self):
-        worked = False
+        did_work_or_eat = False
         if len(self.house.occupants) > 1:
-            worked = self.check_bowl()
+            did_work_or_eat = self.check_bowl()
         if self.fullness <= 0:
             cprint('Сильный и независимый {} умер...'.format(self.name), color='red')
             self.is_alive = False
             return
         dice = randint(1, 6)
-        if not worked:
+        if not did_work_or_eat:
             if self.fullness < 20:
                 self.eat()
             elif self.house.food < 10:
@@ -122,10 +122,7 @@ class Man:
             elif self.money < 50:
                 self.work()
             elif self.house.mess >= 100:
-                if self.fullness > 20:  # добавил условие про fullness, иначе когда сытость 20 помирает после уборки
-                    self.clean_house()
-                else:
-                    self.eat()          # а потом пришлось есть вместо уборки, иначе бардак переваливал за 1000 за год
+                self.clean_house()
             elif dice == 1:
                 self.work()
             elif dice == 2:
@@ -177,15 +174,27 @@ class Man:
                 self.name, self.money, self.house.cat_food))
             return False
         else:
-            print('На кошачью еду нет денег, {} пошел на работу'.format(self.name))
-            self.work()
-            return True
+            if self.fullness > 10:
+                print('На кошачью еду нет денег, {} пошел на работу'.format(self.name))
+                self.work()
+                return True
+            else:
+                self.eat()
+                return True
 
     def clean_house(self):
-        self.house.mess -= 100
-        self.fullness -= 20
-        print('{} прибрался. Уровень беспорядка дома - {}, сытость - {}'.format(
-            self.name, self.house.mess, self.fullness))
+
+        """ Важно прислушиваться к своему организму.
+        Если чувствуешь, что уборка не по силам - скушай
+        больше каши и приберись завтра со свежими силами """
+
+        if self.fullness > 20:
+            self.house.mess -= 100
+            self.fullness -= 20
+            print('{} прибрался. Уровень беспорядка дома - {}, сытость - {}'.format(
+                self.name, self.house.mess, self.fullness))
+        else:
+            self.eat()
 
 
 class Cat:
