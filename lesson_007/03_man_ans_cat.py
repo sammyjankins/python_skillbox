@@ -82,7 +82,7 @@ class Man:
         elif activity == 2:
             cprint('{} гулял целый день'.format(self.name), color='green')
             self.fullness -= 10
-            if len(self.house.occupants) < 4 and randint(1, 2) == 1:
+            if randint(1, 2) == 1:
                 self.get_a_cat()
         elif activity == 3:
             cprint('{} изучал Python целый день'.format(self.name), color='green')
