@@ -80,12 +80,12 @@ class Man:
             cprint('{} смотрел Коня Боджека целый день'.format(self.name), color='green')
             self.fullness -= 10
         elif activity == 2:
-            cprint('{} гулял целый день'.format(self.name), color='green')
+            cprint('{} гулял целый день'.format(self.name), color='magenta')
             self.fullness -= 10
             if randint(1, 2) == 1:
                 self.get_a_cat()
         elif activity == 3:
-            cprint('{} изучал Python целый день'.format(self.name), color='green')
+            cprint('{} изучал Python целый день'.format(self.name), color='blue')
             self.fullness -= 10
         else:
             cprint('{} играл в The Sims целый день'.format(self.name), color='green')
@@ -144,7 +144,8 @@ class Man:
         действием, на которое тратится день."""
 
         if self.house.cat_bowl >= 10:
-            print('{} проверил кошачью миску. В миске есть {} кошачьей еды.'.format(self.name, self.house.cat_bowl))
+            cprint('{} проверил кошачью миску. В миске есть {} кошачьей еды.'.format(self.name, self.house.cat_bowl),
+                   color='green')
             return False
         else:
             return self.feed_pets()
@@ -153,15 +154,15 @@ class Man:
         if self.house.cat_food >= 50:
             self.house.cat_bowl += 50
             self.house.cat_food -= 50
-            print('Миска пуста. {} заполнил кошачью миску до отвала. Кошачьей еды осталось {}'.format(
-                self.name, self.house.cat_food))
+            cprint('Миска пуста. {} заполнил кошачью миску до отвала. Кошачьей еды осталось {}'.format(
+                self.name, self.house.cat_food), color='yellow')
             if self.house.cat_food == 0:
                 return self.buy_cat_food()
         elif self.house.cat_food > 0:
             self.house.cat_bowl += self.house.cat_food
             self.house.cat_food = 0
-            print('Миска пуста. {} заполнил кошачью миску оставшейся кошачьей едой. В миске теперь {} еды'.format(
-                self.name, self.house.cat_bowl))
+            cprint('Миска пуста. {} заполнил кошачью миску оставшейся кошачьей едой. В миске теперь {} еды'.format(
+                self.name, self.house.cat_bowl), color='yellow')
             return self.buy_cat_food()
         else:
             return self.buy_cat_food()
@@ -170,12 +171,12 @@ class Man:
         if self.money >= 50:
             self.money -= 50
             self.house.cat_food += 50
-            print('{} купил кошачьей еды. Теперь денег {}, а кошачьей еды {}'.format(
-                self.name, self.money, self.house.cat_food))
+            cprint('{} купил кошачьей еды. Теперь денег {}, а кошачьей еды {}'.format(
+                self.name, self.money, self.house.cat_food), color='magenta')
             return False
         else:
             if self.fullness > 10:
-                print('На кошачью еду нет денег, {} пошел на работу'.format(self.name))
+                cprint('На кошачью еду нет денег, {} пошел на работу'.format(self.name), color='red')
                 self.work()
                 return True
             else:
@@ -191,8 +192,8 @@ class Man:
         if self.fullness > 20:
             self.house.mess -= 100
             self.fullness -= 20
-            print('{} прибрался. Уровень беспорядка дома - {}, сытость - {}'.format(
-                self.name, self.house.mess, self.fullness))
+            cprint('{} прибрался. Уровень беспорядка дома - {}, сытость - {}'.format(
+                self.name, self.house.mess, self.fullness), color='cyan')
         else:
             self.eat()
 
@@ -219,11 +220,12 @@ class Cat:
             self.fullness += 20
             self.house.cat_bowl -= 10
         else:
+            self.fullness -= 10
             cprint('Кот {} хотел поесть, но в миске нет еды'.format(self.name), color='red')
 
     def sleep(self):
         self.fullness -= 10
-        cprint('Кот {} проспал весь день'.format(self.name), color='red')
+        cprint('Кот {} проспал весь день'.format(self.name), color='cyan')
 
     def tear_wallpaper(self):
         self.fullness -= 10
