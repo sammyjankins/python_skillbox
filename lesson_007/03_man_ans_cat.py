@@ -82,7 +82,7 @@ class Man:
         elif activity == 2:
             cprint('{} гулял целый день'.format(self.name), color='green')
             self.fullness -= 10
-            if randint(1, 2) == 1:
+            if len(self.house.occupants) < 4 and randint(1, 2) == 1:
                 self.get_a_cat()
         elif activity == 3:
             cprint('{} изучал Python целый день'.format(self.name), color='green')
@@ -122,7 +122,10 @@ class Man:
             elif self.money < 50:
                 self.work()
             elif self.house.mess >= 100:
-                self.clean_house()
+                if self.fullness > 20:  # добавил условие про fullness, иначе когда сытость 20 помирает после уборки
+                    self.clean_house()
+                else:
+                    self.eat()          # а потом пришлось есть вместо уборки, иначе бардак переваливал за 1000 за год
             elif dice == 1:
                 self.work()
             elif dice == 2:
@@ -235,7 +238,7 @@ class Cat:
 my_sweet_home = House()
 human = Man()
 human.go_to_the_house(my_sweet_home)
-its_ok = True
+its_ok = True  # если дома все живы, то it's ok
 for day in range(1, 366):
     if its_ok:
         print('================ день {} =================='.format(day))
