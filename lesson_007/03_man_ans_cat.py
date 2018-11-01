@@ -82,7 +82,7 @@ class Man:
         elif activity == 2:
             cprint('{} гулял целый день'.format(self.name), color='magenta')
             self.fullness -= 10
-            if randint(1, 2) == 1:
+            if len(self.house.occupants) < 4 and randint(1, 2) == 1:
                 self.get_a_cat()
         elif activity == 3:
             cprint('{} изучал Python целый день'.format(self.name), color='blue')
@@ -141,9 +141,11 @@ class Man:
         """В доме есть кошачья миска, человек проверяет ее каждый день и наполняет,
         если пустая (feed_pets()). Если еда кончается, покупает (buy_cat_food()),
         либо идет на работу если нет денег (work()), в таком случае это считается
-        действием, на которое тратится день."""
+        действием, на которое тратится день.
 
-        if self.house.cat_bowl >= 10:
+        UPD: при растущем количестве котов, проверяем, что в миске еды хватает на всех"""
+
+        if self.house.cat_bowl >= 10 * (len(self.house.occupants) - 1):
             cprint('{} проверил кошачью миску. В миске есть {} кошачьей еды.'.format(self.name, self.house.cat_bowl),
                    color='green')
             return False
