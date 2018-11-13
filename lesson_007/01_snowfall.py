@@ -11,16 +11,20 @@ sd.background_color = sd.COLOR_BLACK
 #  - отработку изменений координат
 #  - отрисовку
 
-
+# TODO: не, это конечно работает, но лучше сделать проще
+# TODO: пусть класс SnowFlake описывает только снежинку и её атрибуты/методы
+# TODO: а flakes и level вынести из атрибутов класса и сделать либо просто глобальными, либо атрибутами инстанса
+# TODO: класса SnowFall.
+# TODO: в level просто кладутся инстансы объектов класса SnowFlake
 class Snowflake:
     flakes = []
     level = 0    # будет сугроб
 
     def __init__(self):
-        self.x = sd.randint(0, res[0])
+        self.x = sd.randint(0, res[0])  # TODO: пусть res передается как аргумент в __init__
         self.y = res[1]
         self.length = sd.randint(5, 50)
-        self.delta_y = sd.randint(10, 20)
+        self.delta_y = sd.randint(10, 20)  # TODO: пусть дельты передаются аргументами в .move()
         self.delta_x = self.length // 5
         self.factor_a = sd.randint(4, 7) / 10
         self.factor_b = sd.randint(2, 5) / 10
