@@ -20,9 +20,9 @@ class Snowflake:
     flakes = []
     level = 0    # будет сугроб
 
-    def __init__(self):
-        self.x = sd.randint(0, res[0])  # TODO: пусть res передается как аргумент в __init__
-        self.y = res[1]
+    def __init__(self, resolution):
+        self.x = sd.randint(0, resolution[0])
+        self.y = resolution[1]
         self.length = sd.randint(5, 50)
         self.delta_y = sd.randint(10, 20)  # TODO: пусть дельты передаются аргументами в .move()
         self.delta_x = self.length // 5
@@ -57,7 +57,7 @@ class Snowflake:
             return False
 
 
-# flake = Snowflake()
+# flake = Snowflake(res)
 #
 # while True:
 #     flake.clear_previous_picture()
@@ -72,7 +72,7 @@ class Snowflake:
 
 def get_flakes(count=10):
     for _ in range(count):
-        Snowflake()
+        Snowflake(res)
 
 
 def get_fallen_flakes():
