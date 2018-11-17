@@ -18,19 +18,19 @@ sd.background_color = sd.COLOR_BLACK
 # TODO: в level просто кладутся инстансы объектов класса SnowFlake
 class Snowflake:
     flakes = []
-    level = 0    # будет сугроб
+    level = 0  # будет сугроб
 
     def __init__(self, resolution):
         self.x = sd.randint(0, resolution[0])
         self.y = resolution[1]
         self.length = sd.randint(5, 50)
-        self.delta_y = sd.randint(10, 20)  # TODO: пусть дельты передаются аргументами в .move()
+        self.delta_y = sd.randint(10, 20)
         self.delta_x = self.length // 5
         self.factor_a = sd.randint(4, 7) / 10
         self.factor_b = sd.randint(2, 5) / 10
         self.factor_c = sd.randint(40, 70)
         self.color = sd.COLOR_WHITE
-        self.skip = False                      # чтобы не учитывалась каждый раз как только что упавшая
+        self.skip = False  # чтобы не учитывалась каждый раз как только что упавшая
         Snowflake.flakes.append(self)
 
     def clear_previous_picture(self):
@@ -38,9 +38,9 @@ class Snowflake:
         Snowflake.draw(self)
         self.color = sd.COLOR_WHITE
 
-    def move(self):
-        self.x += self.delta_x
-        self.y -= self.delta_y
+    def move(self, delta_x, delta_y):
+        self.x += delta_x
+        self.y -= delta_y
 
     def draw(self):
         sd.snowflake(sd.get_point(self.x, self.y),
@@ -93,7 +93,7 @@ while True:
     for flake in Snowflake.flakes:
         if not flake.skip:
             flake.clear_previous_picture()
-            flake.move()
+            flake.move(flake.delta_x, flake.delta_y)
             flake.draw()
     fallen_flakes = get_fallen_flakes()
     if fallen_flakes:
@@ -104,5 +104,3 @@ while True:
         break
 
 sd.pause()
-
-
