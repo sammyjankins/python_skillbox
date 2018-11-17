@@ -26,6 +26,10 @@
 from random import randint, choice
 from termcolor import cprint
 
+man_names = ['Гарри', 'Джеймс', 'Генри']
+cat_names = ['Майкл', 'Эдди', 'Роджер', 'Винсент', 'Дуглас', 'Леонард', 'Уолтер',
+             'Джозеф', 'Джаспер', 'Эндрю', 'Ричард']
+
 
 class House:
 
@@ -44,12 +48,16 @@ class House:
             return 'В доме еды осталось {}, кошачьей еды - {}, уровень беспорядка - {}'.format(
                 self.food, self.cat_food, self.mess)
 
+    def accept_occupant(self, occupant):
+        if isinstance(occupant, Man) or isinstance(occupant, Cat):
+            self.occupants.append(occupant)
+            occupant.bind_to_house(self)
+
 
 class Man:
-    names = ['Гарри', 'Джеймс', 'Генри']  # TODO: это лучше унести в константу за пределы класса
 
-    def __init__(self):
-        self.name = choice(Man.names)
+    def __init__(self, names):
+        self.name = choice(names)
         self.fullness = 50
         self.house = None
         self.money = 0
@@ -99,14 +107,9 @@ class Man:
         else:
             cprint('{} деньги кончились!'.format(self.name), color='red')
 
-    def go_to_the_house(self, house):
+    def bind_to_house(self, house):
         self.house = house
         self.fullness -= 10
-        self.house.occupants.append(self)  # TODO: не очень правильно давать манипуляровать атрибутами одного класса методам другого класса.
-                                           # TODO: Например если мы хотим контроллировать то, что мы поселяем в дом.
-                                           # TODO: сделайте в классе дома метод, который бы принимал объект и проверял этот на принадлежность к одному из допустимых классов
-                                           # TODO: и заселение всех существ бы происходило через него
-                                           # TODO: а у существ сделать что-то вроде .bind_to_house(house)
         cprint('{} Вьехал в дом'.format(self.name), color='cyan')
 
     def act(self):
@@ -135,10 +138,12 @@ class Man:
                 self.leisure()
 
     def get_a_cat(self):
-        cat = Cat()
-        self.house.occupants.append(cat)
-        cat.house = self.house
+        available_names = []
+        for occupant in self.house.occupants:
+            available_names.append(occupant.name)
+        cat = Cat(choice(list(set(cat_names) - set(available_names))))
         cprint('Пока гулял, подобрал кота и назвал его - {}'.format(cat.name), color='green')
+        self.house.accept_occupant(cat)
 
     def check_bowl(self):
 
@@ -205,13 +210,10 @@ class Man:
 
 
 class Cat:
-    cat_names = ['Майкл', 'Эдди', 'Роджер', 'Винсент', 'Дуглас', 'Леонард', 'Уолтер',
-                 'Джозеф', 'Джаспер', 'Эндрю', 'Ричард']  # TODO: это лучше унести в константу за пределы класса
 
-    def __init__(self):
+    def __init__(self, name):
         """Когда называем кота - чистим список от его имени"""
-        self.name = choice(Cat.cat_names)
-        Cat.cat_names.remove(self.name)
+        self.name = name
         self.fullness = 50
         self.house = None
         self.is_alive = True
@@ -251,10 +253,14 @@ class Cat:
         elif dice == 2:
             self.tear_wallpaper()
 
+    def bind_to_house(self, house):
+        self.house = house
+        cprint('{} поселился в доме!'.format(self.name), color='cyan')
+
 
 my_sweet_home = House()
-human = Man()
-human.go_to_the_house(my_sweet_home)
+human = Man(man_names)
+my_sweet_home.accept_occupant(human)
 its_ok = True  # если дома все живы, то it's ok
 for day in range(1, 366):
     if its_ok:
