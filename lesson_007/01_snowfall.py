@@ -82,7 +82,7 @@ class Snowflake:
 snowfall = SnowFall()
 
 
-def get_flakes(count=10):
+def get_flakes(count=10):  # TODO: это можно сделать методом SnowFall и вызывать в ините
     for _ in range(count):
         snowfall.flakes.append(Snowflake(res))
 
@@ -90,7 +90,7 @@ def get_flakes(count=10):
 get_flakes(25)
 
 # сугроб увеличивается со временем
-while True:
+while True:  # TODO: это же ни что иное как snowfall.run()
     for flake in snowfall.flakes:
         if not flake.skip:
             flake.clear_previous_picture()
