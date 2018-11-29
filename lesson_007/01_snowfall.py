@@ -11,22 +11,6 @@ sd.background_color = sd.COLOR_BLACK
 #  - отработку изменений координат
 #  - отрисовку
 
-class SnowFall:
-
-    def __init__(self):
-        self.flakes = []
-        self.level = 0
-
-    def get_fallen_flakes(self):
-        fallen_count = 0
-        for flake in self.flakes:
-            if not flake.skip:
-                if not flake.can_fall(self.level):
-                    fallen_count += 1
-                    flake.skip = not flake.skip
-        return fallen_count
-
-
 class Snowflake:
 
     def __init__(self, resolution):
@@ -65,6 +49,27 @@ class Snowflake:
             return False
 
 
+class SnowFall:
+
+    def __init__(self):
+        self.flakes = []
+        self.level = 0
+        self.generate_flakes()
+
+    def get_fallen_flakes(self):
+        fallen_count = 0
+        for flake in self.flakes:
+            if not flake.skip:
+                if not flake.can_fall(self.level):
+                    fallen_count += 1
+                    flake.skip = not flake.skip
+        return fallen_count
+
+    def generate_flakes(self, count=10):
+        for _ in range(count):
+            self.flakes.append(Snowflake(res))
+
+
 # snowfall = SnowFall()
 # flake = Snowflake(res)
 # snowfall.flakes.append(flake)
@@ -81,14 +86,6 @@ class Snowflake:
 
 snowfall = SnowFall()
 
-
-def get_flakes(count=10):  # TODO: это можно сделать методом SnowFall и вызывать в ините
-    for _ in range(count):
-        snowfall.flakes.append(Snowflake(res))
-
-
-get_flakes(25)
-
 # сугроб увеличивается со временем
 while True:  # TODO: это же ни что иное как snowfall.run()
     for flake in snowfall.flakes:
@@ -98,7 +95,7 @@ while True:  # TODO: это же ни что иное как snowfall.run()
             flake.draw()
     fallen_flakes = snowfall.get_fallen_flakes()
     if fallen_flakes:
-        get_flakes(count=fallen_flakes)
+        snowfall.generate_flakes(count=fallen_flakes)
         snowfall.level += fallen_flakes / 5
     sd.sleep(0.1)
     if sd.user_want_exit():
