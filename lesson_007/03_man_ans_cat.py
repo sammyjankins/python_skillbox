@@ -25,9 +25,9 @@
 
 from random import randint, choice
 from termcolor import cprint
-# TODO: константы называем капслоком
-man_names = ['Гарри', 'Джеймс', 'Генри']
-cat_names = ['Майкл', 'Эдди', 'Роджер', 'Винсент', 'Дуглас', 'Леонард', 'Уолтер',
+
+MAN_NAMES = ['Гарри', 'Джеймс', 'Генри']
+CAT_NAMES = ['Майкл', 'Эдди', 'Роджер', 'Винсент', 'Дуглас', 'Леонард', 'Уолтер',
              'Джозеф', 'Джаспер', 'Эндрю', 'Ричард']
 
 
@@ -141,7 +141,7 @@ class Man:
         available_names = []
         for occupant in self.house.occupants:
             available_names.append(occupant.name)
-        cat = Cat(choice(list(set(cat_names) - set(available_names))))
+        cat = Cat(choice(list(set(CAT_NAMES) - set(available_names))))
         cprint('Пока гулял, подобрал кота и назвал его - {}'.format(cat.name), color='green')
         self.house.accept_occupant(cat)
 
@@ -259,7 +259,7 @@ class Cat:
 
 
 my_sweet_home = House()
-human = Man(man_names)
+human = Man(MAN_NAMES)
 my_sweet_home.accept_occupant(human)
 its_ok = True  # если дома все живы, то it's ok
 for day in range(1, 366):
