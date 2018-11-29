@@ -51,10 +51,11 @@ class Snowflake:
 
 class SnowFall:
 
-    def __init__(self):
+    def __init__(self, count=10):
         self.flakes = []
         self.level = 0
-        self.generate_flakes()
+        self.generate_flakes(count)
+        self.run()
 
     def get_fallen_flakes(self):
         fallen_count = 0
@@ -65,40 +66,26 @@ class SnowFall:
                     flake.skip = not flake.skip
         return fallen_count
 
-    def generate_flakes(self, count=10):
+    def generate_flakes(self, count):
         for _ in range(count):
             self.flakes.append(Snowflake(res))
 
+    def run(self):
+        while True:
+            for flake in self.flakes:
+                if not flake.skip:
+                    flake.clear_previous_picture()
+                    flake.move(flake.delta_x, flake.delta_y)
+                    flake.draw()
+            fallen_flakes = self.get_fallen_flakes()
+            if fallen_flakes:
+                self.generate_flakes(count=fallen_flakes)
+                self.level += fallen_flakes / 5
+            sd.sleep(0.1)
+            if sd.user_want_exit():
+                break
 
-# snowfall = SnowFall()
-# flake = Snowflake(res)
-# snowfall.flakes.append(flake)
-#
-# while True:
-#     flake.clear_previous_picture()
-#     flake.move(flake.delta_x, flake.delta_y)
-#     flake.draw()
-#     if not Snowflake(res).can_fall(snowfall.level):
-#         break
-#     sd.sleep(0.1)
-#     if sd.user_want_exit():
-#         break
 
 snowfall = SnowFall()
-
-# сугроб увеличивается со временем
-while True:  # TODO: это же ни что иное как snowfall.run()
-    for flake in snowfall.flakes:
-        if not flake.skip:
-            flake.clear_previous_picture()
-            flake.move(flake.delta_x, flake.delta_y)
-            flake.draw()
-    fallen_flakes = snowfall.get_fallen_flakes()
-    if fallen_flakes:
-        snowfall.generate_flakes(count=fallen_flakes)
-        snowfall.level += fallen_flakes / 5
-    sd.sleep(0.1)
-    if sd.user_want_exit():
-        break
 
 sd.pause()
