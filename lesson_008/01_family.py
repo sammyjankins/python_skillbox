@@ -83,7 +83,7 @@ class Man:
             meal = randint(10, 30)
             cprint('{} ест'.format(self.name), color='yellow')
             self.fullness += meal
-            Man.eaten += meal
+            Man.eaten += meal  # TODO: тогда у всех инстансов Man (и всего, что от него унаследовано) eaten будет тоже увеличиваться
             self.house.food -= meal
             return True
         else:
@@ -125,7 +125,7 @@ class House:
 
     def increase_of_capital(self, amount):
         self.money += amount
-        House.total_money += amount
+        House.total_money += amount  # TODO: то же самое
 
 
 class Husband(Man):
