@@ -105,6 +105,10 @@ class Man(Occupant):
             self.happiness -= 10
             return False
 
+    def pet_a_cat(self):
+        self.happiness += 5
+        print('{} гладит кота'.format(self.name))
+
 
 class House:
     total_money = 0
@@ -160,6 +164,8 @@ class Husband(Man):
                 dice = randint(1, 3)
                 if dice == 1:
                     self.gaming()
+                elif dice == 2:
+                    self.pet_a_cat()
                 else:
                     self.work()
 
@@ -197,6 +203,8 @@ class Wife(Man):
                     self.shopping()
                 elif dice == 2:
                     self.clean_house()
+                elif dice == 3:
+                    self.pet_a_cat()
                 else:
                     self.buy_fur_coat()
 
