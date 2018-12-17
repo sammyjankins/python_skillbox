@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from termcolor import cprint
-from random import randint
+from random import randint, choice
 
 ######################################################## Часть первая
 #
@@ -45,14 +45,26 @@ CAT_NAMES = ['Майкл', 'Эдди', 'Роджер', 'Винсент', 'Дуг
              'Джозеф', 'Джаспер', 'Эндрю', 'Ричард', 'Гарри', 'Джеймс', 'Генри', 'Фрэнк']
 
 
-class Man:
+# Класс жителя дома, здесь будут скомпилированы некоторые атрибуты и методы, справедливые как для
+# людей, так и для котов (может эволюционировать в класс Млекопитающего)
+class Occupant:
+
+    def __init__(self, name):
+        self.name = name
+        self.house = None
+        self.fullness = 30
+
+    def bind_to_house(self, house):
+        self.house = house
+        self.fullness -= 10
+        cprint('{} вьезжает в дом'.format(self.name), color='cyan')
+
+
+class Man(Occupant):
     eaten = 0
 
-    def __init__(self, name, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.house = None
-        self.name = name
-        self.fullness = 30
+    def __init__(self, name):
+        super().__init__(name)
         self.happiness = 100
 
     def __str__(self):
@@ -90,11 +102,6 @@ class Man:
             self.happiness -= 10
             return False
 
-    def bind_to_house(self, house):
-        self.house = house
-        self.fullness -= 10
-        cprint('{} вьезжае в дом'.format(self.name), color='cyan')
-
 
 class House:
     total_money = 0
@@ -102,6 +109,7 @@ class House:
     def __init__(self):
         self.money = 100
         self.food = 50
+        self.cat_food = 30
         self.mess = 0
         self.occupants = []
         self.its_ok = True
@@ -111,7 +119,7 @@ class House:
             self.food, self.money, self.mess)
 
     def accept_occupant(self, occupant):
-        if isinstance(occupant, Man):
+        if isinstance(occupant, (Man, Cat)):
             self.occupants.append(occupant)
             occupant.bind_to_house(self)
 
@@ -234,10 +242,10 @@ class Wife(Man):
         self.husband = husband
 
 
-class Cat:
+class Cat(Occupant):
 
-    def __init__(self):
-        pass
+    def __init__(self, name):
+        super().__init__(name)
 
     def act(self):
         pass
@@ -255,6 +263,7 @@ class Cat:
 home = House()
 serge = Husband(name='Сережа')
 masha = Wife(name='Маша')
+cat = Cat(choice(CAT_NAMES))
 
 # свадьба
 serge.to_marry(masha)
@@ -263,12 +272,14 @@ serge.to_marry(masha)
 
 home.accept_occupant(serge)
 home.accept_occupant(masha)
+home.accept_occupant(cat)
 
 for day in range(1, 366):
     if home.its_ok:
         cprint('\n================== День {} =================='.format(day), color='red')
         serge.act()
         masha.act()
+        cat.act()
         home.act()
         cprint(serge, color='cyan')
         cprint(masha, color='cyan')
