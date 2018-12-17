@@ -63,6 +63,11 @@ class Occupant:
         self.fullness -= 10
         cprint('{} вьезжает в дом'.format(self.name), color='cyan')
 
+    def dying(self, reason='с голоду'):
+        cprint('{} умирает {}...'.format(self.name, reason), color='red')
+        self.house.someone_is_dead()
+        return True
+
 
 class Man(Occupant):
     eaten = 0
@@ -74,12 +79,10 @@ class Man(Occupant):
     def __str__(self):
         return 'Я - ' + super().__str__() + ', уровень счастья - {}'.format(self.happiness)
 
-    def dying(self):
+    def dying(self, reason='с голоду'):
         if self.fullness <= 0 or self.happiness <= 10:
-            reason = 'с голоду' if self.fullness <= 0 else 'от депрессии'
-            cprint('{} умирает {}...'.format(self.name, reason), color='red')
-            self.house.someone_is_dead()
-            return True
+            reason = reason if self.fullness <= 0 else 'от депрессии'
+            return super().dying(reason)
         return False
 
     def act(self):
@@ -161,7 +164,7 @@ class Husband(Man):
             elif self.house.money < 100:
                 self.work()
             else:
-                dice = randint(1, 3)
+                dice = randint(1, 4)
                 if dice == 1:
                     self.gaming()
                 elif dice == 2:
@@ -262,7 +265,8 @@ class Cat(Occupant):
         return 'Я - кот ' + super().__str__()
 
     def act(self):
-        pass
+        if self.dying():
+            return False
 
     def eat(self):
         pass
@@ -272,6 +276,11 @@ class Cat(Occupant):
 
     def soil(self):
         pass
+
+    def dying(self, reason='с голоду'):
+        if self.fullness <= 0:
+            return super().dying()
+        return True
 
 
 home = House()
