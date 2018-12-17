@@ -54,6 +54,10 @@ class Occupant:
         self.house = None
         self.fullness = 30
 
+    def __str__(self):
+        return '{}, сытость - {}'.format(
+            self.name, self.fullness)
+
     def bind_to_house(self, house):
         self.house = house
         self.fullness -= 10
@@ -68,8 +72,7 @@ class Man(Occupant):
         self.happiness = 100
 
     def __str__(self):
-        return 'Я - {}, сытость - {}, уровень счастья - {}'.format(
-            self.name, self.fullness, self.happiness)
+        return 'Я - ' + super().__str__() + ', уровень счастья - {}'.format(self.happiness)
 
     def dying(self):
         if self.fullness <= 0 or self.happiness <= 10:
@@ -247,6 +250,9 @@ class Cat(Occupant):
     def __init__(self, name):
         super().__init__(name)
 
+    def __str__(self):
+        return 'Я - кот ' + super().__str__()
+
     def act(self):
         pass
 
@@ -283,6 +289,7 @@ for day in range(1, 366):
         home.act()
         cprint(serge, color='cyan')
         cprint(masha, color='cyan')
+        cprint(cat, color='cyan')
         cprint(home, color='cyan')
 
 print('\nВ итоге:')
