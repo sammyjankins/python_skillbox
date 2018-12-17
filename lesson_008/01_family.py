@@ -46,7 +46,6 @@ CAT_NAMES = ['Майкл', 'Эдди', 'Роджер', 'Винсент', 'Дуг
 
 
 class Man:
-
     eaten = 0
 
     def __init__(self, name, *args, **kwargs):
@@ -83,7 +82,7 @@ class Man:
             meal = randint(10, 30)
             cprint('{} ест'.format(self.name), color='yellow')
             self.fullness += meal
-            Man.eaten += meal  # TODO: тогда у всех инстансов Man (и всего, что от него унаследовано) eaten будет тоже увеличиваться
+            Man.eaten += meal
             self.house.food -= meal
             return True
         else:
@@ -98,7 +97,6 @@ class Man:
 
 
 class House:
-
     total_money = 0
 
     def __init__(self):
@@ -125,7 +123,7 @@ class House:
 
     def increase_of_capital(self, amount):
         self.money += amount
-        House.total_money += amount  # TODO: то же самое
+        House.total_money += amount
 
 
 class Husband(Man):
@@ -167,7 +165,6 @@ class Husband(Man):
 
 
 class Wife(Man):
-
     closet = 0
 
     def __init__(self, name):
@@ -235,6 +232,24 @@ class Wife(Man):
 
     def to_marry(self, husband):
         self.husband = husband
+
+
+class Child:
+
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        return super().__str__()
+
+    def act(self):
+        pass
+
+    def eat(self):
+        pass
+
+    def sleep(self):
+        pass
 
 
 home = House()
