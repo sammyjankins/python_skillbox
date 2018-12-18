@@ -48,6 +48,7 @@ CAT_NAMES = ['Майкл', 'Эдди', 'Роджер', 'Винсент', 'Дуг
 # Класс жителя дома, здесь будут скомпилированы некоторые атрибуты и методы, справедливые как для
 # людей, так и для котов (может эволюционировать в класс Млекопитающего)
 class Occupant:
+    eaten = 0
 
     def __init__(self, name):
         self.name = name
@@ -68,9 +69,23 @@ class Occupant:
         self.house.someone_is_dead()
         return True
 
+    def eat(self, kind_of_food, fullness_mul, max_food):
+        if self.house.food[kind_of_food] >= max_food:
+            meal = randint(max_food // 3, max_food)
+            Occupant.eaten += meal
+            cprint('{} ест'.format(self.name), color='yellow')
+            self.fullness += meal * fullness_mul
+            self.house.food[kind_of_food] -= meal
+            return True
+        else:
+            insert = ''
+            if kind_of_food == 'cat_food':
+                insert = 'кошачьей '
+            cprint('{} хочет есть, но в доме {}нет еды'.format(self.name, insert), color='red')
+            return False
+
 
 class Man(Occupant):
-    eaten = 0
 
     def __init__(self, name):
         super().__init__(name)
@@ -95,18 +110,8 @@ class Man(Occupant):
             return False
         return True
 
-    def eat(self):
-        if self.house.food >= 30:
-            meal = randint(10, 30)
-            cprint('{} ест'.format(self.name), color='yellow')
-            self.fullness += meal
-            Man.eaten += meal
-            self.house.food -= meal
-            return True
-        else:
-            cprint('{} хочет есть, но в доме нет еды'.format(self.name), color='red')
-            self.happiness -= 10
-            return False
+    def eat(self, kind_of_food='man_food', fullness_mul=1, max_food=30):
+        return super().eat(kind_of_food, fullness_mul, max_food)
 
     def pet_a_cat(self):
         self.happiness += 5
@@ -118,15 +123,14 @@ class House:
 
     def __init__(self):
         self.money = 100
-        self.food = 50
-        self.cat_food = 30
+        self.food = {'man_food': 50, 'cat_food': 30}
         self.mess = 0
         self.occupants = []
         self.its_ok = True
 
     def __str__(self):
-        return 'В доме еды осталось - {}, денег - {}, уровень беспорядка - {}'.format(
-            self.food, self.money, self.mess)
+        return 'В доме еды осталось - {}, кошачьей еды - {}, денег - {}, уровень беспорядка - {}'.format(
+            self.food['man_food'], self.food['cat_food'], self.money, self.mess)
 
     def accept_occupant(self, occupant):
         if isinstance(occupant, (Man, Cat)):
@@ -196,7 +200,7 @@ class Wife(Man):
 
     def act(self):
         if super().act():
-            if self.house.food <= 30:
+            if self.house.food['man_food'] <= 30:
                 self.shopping()
             elif self.house.mess > 100:
                 self.clean_house()
@@ -211,15 +215,16 @@ class Wife(Man):
                 else:
                     self.buy_fur_coat()
 
-    def eat(self):
-        if not super().eat():
+    def eat(self, kind_of_food='man_food', fullness_mul=1, max_food=30):
+        if not super().eat(kind_of_food, fullness_mul, max_food):
             self.shopping()
 
     def shopping(self):
-        if self.house.money >= 50:
+        if self.house.money >= 65:
             cprint('{} сходила в магазин за едой'.format(self.name), color='magenta')
-            self.house.money -= 50
-            self.house.food += 50
+            self.house.money -= 65
+            self.house.food['man_food'] += 50
+            self.house.food['cat_food'] += 15
             self.fullness -= 10
             self.happiness -= 5
         else:
@@ -265,11 +270,15 @@ class Cat(Occupant):
         return 'Я - кот ' + super().__str__()
 
     def act(self):
+        self.fullness -= 5
         if self.dying():
             return False
+        if self.fullness <= 20:
+            self.eat()
+            return False
 
-    def eat(self):
-        pass
+    def eat(self, kind_of_food='cat_food', fullness_mul=2, max_food=10):
+            super().eat(kind_of_food, fullness_mul, max_food)
 
     def sleep(self):
         pass
@@ -280,7 +289,7 @@ class Cat(Occupant):
     def dying(self, reason='с голоду'):
         if self.fullness <= 0:
             return super().dying()
-        return True
+        return False
 
 
 home = House()
@@ -311,7 +320,7 @@ for day in range(1, 366):
 
 print('\nВ итоге:')
 print('Денег заработано - {}'.format(House.total_money))
-print('Еды съедено - {}'.format(Man.eaten))
+print('Еды съедено - {}'.format(Occupant.eaten))
 print('Шуб куплено - {}'.format(Wife.closet))
 
 ######################################################## Часть вторая
