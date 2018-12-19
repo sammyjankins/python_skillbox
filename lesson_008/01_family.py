@@ -68,8 +68,6 @@ class Man:
         return False
 
     def act(self):
-        if self.house.mess > 90:
-            self.happiness -= 10
         if self.dying():
             return False
         if self.fullness < 30:
@@ -77,23 +75,31 @@ class Man:
             return False
         return True
 
-    def eat(self):
-        if self.house.food >= 30:
-            meal = randint(10, 30)
+    def eat(self, max_food=30):
+        if self.house.food >= max_food:
+            meal = randint(max_food // 3, max_food)
+            Man.eaten += meal
             cprint('{} ест'.format(self.name), color='yellow')
             self.fullness += meal
-            Man.eaten += meal
             self.house.food -= meal
             return True
         else:
             cprint('{} хочет есть, но в доме нет еды'.format(self.name), color='red')
-            self.happiness -= 10
             return False
 
     def bind_to_house(self, house):
         self.house = house
         self.fullness -= 10
         cprint('{} вьезжае в дом'.format(self.name), color='cyan')
+
+
+# чтобы счастье менялось только у взрослых
+class Adult(Man):
+
+    def act(self):
+        if self.house.mess > 90:
+            self.happiness -= 10
+        return super().act()
 
 
 class House:
@@ -126,7 +132,7 @@ class House:
         House.total_money += amount
 
 
-class Husband(Man):
+class Husband(Adult, Man):
 
     def __init__(self, name):
         super().__init__(name)
@@ -164,7 +170,7 @@ class Husband(Man):
         self.happiness += 20
 
 
-class Wife(Man):
+class Wife(Adult, Man):
     closet = 0
 
     def __init__(self, name):
@@ -189,7 +195,7 @@ class Wife(Man):
                 else:
                     self.buy_fur_coat()
 
-    def eat(self):
+    def eat(self, *args, **kwargs):
         if not super().eat():
             self.shopping()
 
@@ -234,27 +240,28 @@ class Wife(Man):
         self.husband = husband
 
 
-class Child:
-
-    def __init__(self):
-        pass
-
-    def __str__(self):
-        return super().__str__()
+class Child(Man):
 
     def act(self):
-        pass
+        if super().act():
+            dice = randint(1, 3)
+            if dice == 1:
+                self.eat()
+            else:
+                self.sleep()
 
-    def eat(self):
-        pass
+    def eat(self, max_food=10):
+        super().eat(max_food)
 
     def sleep(self):
-        pass
+        self.fullness -= 10
+        cprint('{} спит'.format(self.name), color='green')
 
 
 home = House()
 serge = Husband(name='Сережа')
 masha = Wife(name='Маша')
+kolya = Child(name='Коля')
 
 # свадьба
 serge.to_marry(masha)
@@ -263,15 +270,18 @@ serge.to_marry(masha)
 
 home.accept_occupant(serge)
 home.accept_occupant(masha)
+home.accept_occupant(kolya)
 
 for day in range(1, 366):
     if home.its_ok:
         cprint('\n================== День {} =================='.format(day), color='red')
         serge.act()
         masha.act()
+        kolya.act()
         home.act()
         cprint(serge, color='cyan')
         cprint(masha, color='cyan')
+        cprint(kolya, color='cyan')
         cprint(home, color='cyan')
 
 print('\nВ итоге:')
