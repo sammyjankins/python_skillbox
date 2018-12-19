@@ -69,9 +69,9 @@ class Occupant:
         self.house.someone_is_dead()
         return True
 
-    def eat(self):
-        (kind_of_food, max_food, fullness_mul) =\
-            ('man_food', 30, 1) if isinstance(self, Man) else ('cat_food', 10, 2)
+    def eat(self, kind_of_food='man_food', max_food=30, fullness_mul=1):
+        if isinstance(self, Cat):
+            (kind_of_food, max_food, fullness_mul) = ('cat_food', 10, 2)
         if self.house.food[kind_of_food] >= max_food:
             meal = randint(max_food // 3, max_food)
             Occupant.eaten += meal
@@ -218,8 +218,8 @@ class Wife(Man):
                 else:
                     self.buy_fur_coat()
 
-    def eat(self):
-        if not super().eat():
+    def eat(self, *args, **kwargs):
+        if not super().eat(*args, **kwargs):
             self.shopping()
 
     def shopping(self):
