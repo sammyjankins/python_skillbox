@@ -70,8 +70,6 @@ class Occupant:
         return True
 
     def eat(self, kind_of_food='man_food', max_food=30, fullness_mul=1):
-        if isinstance(self, Cat):
-            (kind_of_food, max_food, fullness_mul) = ('cat_food', 10, 2)
         if self.house.food[kind_of_food] >= max_food:
             meal = randint(max_food // 3, max_food)
             Occupant.eaten += meal
@@ -277,6 +275,9 @@ class Cat(Occupant):
                 self.sleep()
             else:
                 self.soil()
+
+    def eat(self, kind_of_food='cat_food', max_food=10, fullness_mul=2):
+        super().eat(kind_of_food, max_food, fullness_mul)
 
     def sleep(self):
         self.fullness -= 10
