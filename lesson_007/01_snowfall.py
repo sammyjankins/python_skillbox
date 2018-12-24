@@ -89,3 +89,4 @@ class SnowFall:
 snowfall = SnowFall()
 
 sd.pause()
+# зачет! 
