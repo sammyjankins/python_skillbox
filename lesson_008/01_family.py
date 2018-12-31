@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from termcolor import cprint
-from random import randint
+from random import randint, choice
 
 ######################################################## Часть первая
 #
@@ -45,27 +45,44 @@ CAT_NAMES = ['Майкл', 'Эдди', 'Роджер', 'Винсент', 'Дуг
              'Джозеф', 'Джаспер', 'Эндрю', 'Ричард', 'Гарри', 'Джеймс', 'Генри', 'Фрэнк']
 
 
-class Man:
+# Класс жителя дома, здесь будут скомпилированы некоторые атрибуты и методы, справедливые как для
+# людей, так и для котов
+class Occupant:
     eaten = 0
 
-    def __init__(self, name, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.house = None
+    def __init__(self, name):
         self.name = name
+        self.house = None
         self.fullness = 30
-        self.happiness = 100
 
     def __str__(self):
-        return 'Я - {}, сытость - {}, уровень счастья - {}'.format(
-            self.name, self.fullness, self.happiness)
+        return '{}, сытость - {}'.format(
+            self.name, self.fullness)
 
-    def dying(self):
-        if self.fullness <= 0 or self.happiness <= 10:
-            reason = 'с голоду' if self.fullness <= 0 else 'от депрессии'
-            cprint('{} умирает {}...'.format(self.name, reason), color='red')
-            self.house.someone_is_dead()
+    def bind_to_house(self, house):
+        self.house = house
+        self.fullness -= 10
+        cprint('{} вьезжает в дом'.format(self.name), color='cyan')
+
+    def dying(self, reason='с голоду'):
+        cprint('{} умирает {}...'.format(self.name, reason), color='red')
+        self.house.someone_is_dead()
+        return True
+
+    def eat(self, kind_of_food='man_food', max_food=30, fullness_mul=1):
+        if self.house.food[kind_of_food] >= max_food:
+            meal = randint(max_food // 3, max_food)
+            Occupant.eaten += meal
+            cprint('{} ест'.format(self.name), color='yellow')
+            self.fullness += meal * fullness_mul
+            self.house.food[kind_of_food] -= meal
             return True
-        return False
+        else:
+            insert = ''
+            if kind_of_food == 'cat_food':
+                insert = 'кошачьей '
+            cprint('{} хочет есть, но в доме {}нет еды'.format(self.name, insert), color='red')
+            return False
 
     def act(self):
         if self.dying():
@@ -75,22 +92,31 @@ class Man:
             return False
         return True
 
-    def eat(self, max_food=30):
-        if self.house.food >= max_food:
-            meal = randint(max_food // 3, max_food)
-            Man.eaten += meal
-            cprint('{} ест'.format(self.name), color='yellow')
-            self.fullness += meal
-            self.house.food -= meal
-            return True
-        else:
-            cprint('{} хочет есть, но в доме нет еды'.format(self.name), color='red')
-            return False
 
-    def bind_to_house(self, house):
-        self.house = house
+class Man(Occupant):
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.happiness = 100
+
+    def __str__(self):
+        return 'Я - ' + super().__str__() + ', уровень счастья - {}'.format(self.happiness)
+
+    def dying(self, reason='с голоду'):
+        if self.fullness <= 0 or self.happiness <= 10:
+            reason = reason if self.fullness <= 0 else 'от депрессии'
+            return super().dying(reason)
+        return False
+
+    def act(self):
+        if self.house.mess > 90:
+            self.happiness -= 10
+        return super().act()
+
+    def pet_a_cat(self):
+        self.happiness += 5
         self.fullness -= 10
-        cprint('{} вьезжае в дом'.format(self.name), color='cyan')
+        print('{} гладит кота'.format(self.name))
 
 
 # чтобы счастье менялось только у взрослых
@@ -107,17 +133,17 @@ class House:
 
     def __init__(self):
         self.money = 100
-        self.food = 50
+        self.food = {'man_food': 50, 'cat_food': 30}
         self.mess = 0
         self.occupants = []
         self.its_ok = True
 
     def __str__(self):
-        return 'В доме еды осталось - {}, денег - {}, уровень беспорядка - {}'.format(
-            self.food, self.money, self.mess)
+        return 'В доме еды осталось - {}, кошачьей еды - {}, денег - {}, уровень беспорядка - {}'.format(
+            self.food['man_food'], self.food['cat_food'], self.money, self.mess)
 
     def accept_occupant(self, occupant):
-        if isinstance(occupant, Man):
+        if isinstance(occupant, (Man, Cat)):
             self.occupants.append(occupant)
             occupant.bind_to_house(self)
 
@@ -152,9 +178,11 @@ class Husband(Adult, Man):
             elif self.house.money < 100:
                 self.work()
             else:
-                dice = randint(1, 3)
+                dice = randint(1, 4)
                 if dice == 1:
                     self.gaming()
+                elif dice == 2:
+                    self.pet_a_cat()
                 else:
                     self.work()
 
@@ -182,7 +210,7 @@ class Wife(Adult, Man):
 
     def act(self):
         if super().act():
-            if self.house.food <= 30:
+            if self.house.food['man_food'] <= 30:
                 self.shopping()
             elif self.house.mess > 100:
                 self.clean_house()
@@ -192,20 +220,22 @@ class Wife(Adult, Man):
                     self.shopping()
                 elif dice == 2:
                     self.clean_house()
+                elif dice == 3:
+                    self.pet_a_cat()
                 else:
                     self.buy_fur_coat()
 
     def eat(self, *args, **kwargs):
-        if not super().eat():
+        if not super().eat(*args, **kwargs):
             self.shopping()
 
     def shopping(self):
         if self.house.money >= 50:
             cprint('{} сходила в магазин за едой'.format(self.name), color='magenta')
             self.house.money -= 50
-            self.house.food += 50
+            self.house.food['man_food'] += 40
+            self.house.food['cat_food'] += 10
             self.fullness -= 10
-            self.happiness -= 5
         else:
             cprint('{} деньги кончились!'.format(self.name), color='red')
             cprint('{}, марш работать!'.format(self.husband.name))
@@ -230,7 +260,7 @@ class Wife(Adult, Man):
             else:
                 self.house.mess = 0
             self.fullness -= 10
-            self.happiness -= 20
+            self.happiness -= 25
             cprint('{} прибралась'.format(
                 self.name), color='green')
         else:
@@ -258,10 +288,44 @@ class Child(Man):
         cprint('{} спит'.format(self.name), color='green')
 
 
+class Cat(Occupant):
+
+    def __str__(self):
+        return 'Я - кот ' + super().__str__()
+
+    def act(self):
+        if super().act():
+            dice = randint(1, 6)
+            if dice == 1:
+                self.eat()
+            elif dice == 2:
+                self.sleep()
+            else:
+                self.soil()
+
+    def eat(self, kind_of_food='cat_food', max_food=10, fullness_mul=2):
+        super().eat(kind_of_food, max_food, fullness_mul)
+
+    def sleep(self):
+        self.fullness -= 10
+        cprint('{} спит'.format(self.name), color='green')
+
+    def soil(self):
+        self.fullness -= 10
+        self.house.mess += 5
+        cprint('{} дерет обои'.format(self.name), color='yellow')
+
+    def dying(self, reason='с голоду'):
+        if self.fullness <= 0:
+            return super().dying()
+        return False
+
+
 home = House()
 serge = Husband(name='Сережа')
 masha = Wife(name='Маша')
 kolya = Child(name='Коля')
+cat = Cat(choice(CAT_NAMES))
 
 # свадьба
 serge.to_marry(masha)
@@ -271,6 +335,7 @@ serge.to_marry(masha)
 home.accept_occupant(serge)
 home.accept_occupant(masha)
 home.accept_occupant(kolya)
+home.accept_occupant(cat)
 
 for day in range(1, 366):
     if home.its_ok:
@@ -278,15 +343,17 @@ for day in range(1, 366):
         serge.act()
         masha.act()
         kolya.act()
+        cat.act()
         home.act()
         cprint(serge, color='cyan')
         cprint(masha, color='cyan')
         cprint(kolya, color='cyan')
+        cprint(cat, color='cyan')
         cprint(home, color='cyan')
 
 print('\nВ итоге:')
 print('Денег заработано - {}'.format(House.total_money))
-print('Еды съедено - {}'.format(Man.eaten))
+print('Еды съедено - {}'.format(Occupant.eaten))
 print('Шуб куплено - {}'.format(Wife.closet))
 
 ######################################################## Часть вторая
