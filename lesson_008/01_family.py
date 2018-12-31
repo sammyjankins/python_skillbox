@@ -108,11 +108,6 @@ class Man(Occupant):
             return super().dying(reason)
         return False
 
-    def act(self):
-        if self.house.mess > 90:
-            self.happiness -= 10
-        return super().act()
-
     def pet_a_cat(self):
         self.happiness += 5
         self.fullness -= 10
@@ -164,9 +159,6 @@ class Husband(Adult, Man):
         super().__init__(name)
         self.wife = None
 
-    def __str__(self):
-        return super().__str__()
-
     def to_marry(self, wife):
         self.wife = wife
         self.wife.to_marry(self)
@@ -204,9 +196,6 @@ class Wife(Adult, Man):
     def __init__(self, name):
         super().__init__(name)
         self.husband = None
-
-    def __str__(self):
-        return super().__str__()
 
     def act(self):
         if super().act():
@@ -280,8 +269,8 @@ class Child(Man):
             else:
                 self.sleep()
 
-    def eat(self, max_food=10):
-        super().eat(max_food)
+    def eat(self, max_food=10, *args, **kwargs):
+        super().eat(max_food=max_food, *args, **kwargs)
 
     def sleep(self):
         self.fullness -= 10
