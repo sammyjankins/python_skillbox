@@ -69,18 +69,17 @@ class Occupant:
         self.house.someone_is_dead()
         return True
 
-    def eat(self, kind_of_food='man_food', max_food=30, fullness_mul=1):
-        if self.house.food[kind_of_food] >= max_food:
+    def eat(self, max_food=30, fullness_mul=1):
+        food = 'Cat' if isinstance(self, Cat) else 'Man'
+        if self.house.food[food] >= max_food:
             meal = randint(max_food // 3, max_food)
             Occupant.eaten += meal
             cprint('{} ест'.format(self.name), color='yellow')
             self.fullness += meal * fullness_mul
-            self.house.food[kind_of_food] -= meal
+            self.house.food[food] -= meal
             return True
         else:
-            insert = ''
-            if kind_of_food == 'cat_food':
-                insert = 'кошачьей '
+            insert = 'кошачьей ' if food == 'Cat' else ''
             cprint('{} хочет есть, но в доме {}нет еды'.format(self.name, insert), color='red')
             return False
 
@@ -128,14 +127,15 @@ class House:
 
     def __init__(self):
         self.money = 100
-        self.food = {'man_food': 50, 'cat_food': 30}
+        man_food = 50
+        self.food = {'Man': man_food, 'Cat': 30}
         self.mess = 0
         self.occupants = []
         self.its_ok = True
 
     def __str__(self):
         return 'В доме еды осталось - {}, кошачьей еды - {}, денег - {}, уровень беспорядка - {}'.format(
-            self.food['man_food'], self.food['cat_food'], self.money, self.mess)
+            self.food['Man'], self.food['Cat'], self.money, self.mess)
 
     def accept_occupant(self, occupant):
         if isinstance(occupant, (Man, Cat)):
@@ -199,7 +199,7 @@ class Wife(Adult, Man):
 
     def act(self):
         if super().act():
-            if self.house.food['man_food'] <= 30:
+            if self.house.food['Man'] <= 30:
                 self.shopping()
             elif self.house.mess > 100:
                 self.clean_house()
@@ -222,8 +222,8 @@ class Wife(Adult, Man):
         if self.house.money >= 50:
             cprint('{} сходила в магазин за едой'.format(self.name), color='magenta')
             self.house.money -= 50
-            self.house.food['man_food'] += 40
-            self.house.food['cat_food'] += 10
+            self.house.food['Man'] += 40
+            self.house.food['Cat'] += 10
             self.fullness -= 10
         else:
             cprint('{} деньги кончились!'.format(self.name), color='red')
@@ -292,8 +292,8 @@ class Cat(Occupant):
             else:
                 self.soil()
 
-    def eat(self, kind_of_food='cat_food', max_food=10, fullness_mul=2):
-        super().eat(kind_of_food, max_food, fullness_mul)
+    def eat(self, max_food=10, fullness_mul=2):
+        super().eat(max_food, fullness_mul)
 
     def sleep(self):
         self.fullness -= 10
