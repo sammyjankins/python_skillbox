@@ -56,16 +56,15 @@ class Occupant:
         self.fullness = 30
 
     def __str__(self):
-        return '{}, сытость - {}'.format(
-            self.name, self.fullness)
+        return f'{self.name}, сытость - {self.fullness}'
 
     def bind_to_house(self, house):
         self.house = house
         self.fullness -= 10
-        cprint('{} вьезжает в дом'.format(self.name), color='cyan')
+        cprint(f'{self.name} вьезжает в дом', color='cyan')
 
     def dying(self, reason='с голоду'):
-        cprint('{} умирает {}...'.format(self.name, reason), color='red')
+        cprint(f'{self.name} умирает {reason}...', color='red')
         self.house.someone_is_dead()
         return True
 
@@ -74,13 +73,13 @@ class Occupant:
         meal = randint(max_food // 3, max_food)
         if self.house.food[food] >= meal:
             Occupant.eaten += meal
-            cprint('{} ест'.format(self.name), color='yellow')
+            cprint(f'{self.name} ест', color='yellow')
             self.fullness += meal * fullness_mul
             self.house.food[food] -= meal
             return True
         else:
             insert = 'кошачьей ' if food == 'Cat' else ''
-            cprint('{} хочет есть, но в доме {}нет еды'.format(self.name, insert), color='red')
+            cprint(f'{self.name} хочет есть, но в доме {insert}нет еды', color='red')
             return False
 
     def act(self):
@@ -99,7 +98,7 @@ class Man(Occupant):
         self.happiness = 100
 
     def __str__(self):
-        return 'Я - ' + super().__str__() + ', уровень счастья - {}'.format(self.happiness)
+        return f'Я - {super().__str__()}, уровень счастья - {self.happiness}'
 
     def dying(self, reason='с голоду'):
         if self.fullness <= 0 or self.happiness <= 10:
@@ -110,7 +109,7 @@ class Man(Occupant):
     def pet_a_cat(self):
         self.happiness += 5
         self.fullness -= 10
-        print('{} гладит кота'.format(self.name))
+        print(f'{self.name} гладит кота')
 
 
 # чтобы счастье менялось только у взрослых
@@ -134,8 +133,8 @@ class House:
         self.its_ok = True
 
     def __str__(self):
-        return 'В доме еды осталось - {}, кошачьей еды - {}, денег - {}, уровень беспорядка - {}'.format(
-            self.food['Man'], self.food['Cat'], self.money, self.mess)
+        return f'В доме еды осталось - {self.food["Man"]}, кошачьей еды - {self.food["Cat"]}' \
+               f', денег - {self.money}, уровень беспорядка - {self.mess}'
 
     def accept_occupant(self, occupant):
         if isinstance(occupant, (Man, Cat)):
@@ -165,7 +164,7 @@ class Husband(Adult, Man):
 
     def act(self):
         if super().act():
-            if self.happiness < 30:
+            if self.happiness < 35:
                 self.gaming()
             elif self.house.money < 150:
                 self.work()
@@ -183,13 +182,13 @@ class Husband(Adult, Man):
             self.work()
 
     def work(self):
-        cprint('{} сходил на работу'.format(self.name), color='blue')
+        cprint(f'{self.name} сходил на работу', color='blue')
         self.house.increase_of_capital(150)
         self.fullness -= 10
         self.happiness -= 5
 
     def gaming(self):
-        cprint('{} играл в Silent Hill целый день'.format(self.name), color='green')
+        cprint(f'{self.name} играл в Silent Hill целый день', color='green')
         self.fullness -= 10
         self.happiness += 20
 
@@ -203,7 +202,9 @@ class Wife(Adult, Man):
 
     def act(self):
         if super().act():
-            if self.house.food['Man'] <= 30:
+            if self.happiness <= 35:
+                self.buy_fur_coat()
+            elif self.house.food['Man'] <= 30:
                 self.shopping()
             elif self.house.mess > 100:
                 self.clean_house()
@@ -223,14 +224,14 @@ class Wife(Adult, Man):
             self.shopping()
 
     def out_of_money(self):
-        cprint('{} деньги кончились!'.format(self.name), color='red')
-        cprint('{}, марш работать!'.format(self.husband.name))
+        cprint(f'{self.name} деньги кончились!', color='red')
+        cprint(f'{self.husband.name}, марш работать!')
         self.happiness -= 10
         self.pet_a_cat()  # чтобы не словить депрессию
 
     def shopping(self):
         if self.house.money >= 70:
-            cprint('{} сходила в магазин за едой'.format(self.name), color='magenta')
+            cprint(f'{self.name} сходила в магазин за едой', color='magenta')
             self.house.money -= 70
             self.house.food['Man'] += 60
             self.house.food['Cat'] += 10
@@ -240,7 +241,7 @@ class Wife(Adult, Man):
 
     def buy_fur_coat(self):
         if self.house.money >= 350:
-            cprint('{} купила новую шубу'.format(self.name), color='magenta')
+            cprint(f'{self.name} купила новую шубу', color='magenta')
             self.house.money -= 350
             self.happiness += 60
             self.fullness -= 10
@@ -256,8 +257,7 @@ class Wife(Adult, Man):
                 self.house.mess = 0
             self.fullness -= 10
             self.happiness -= 25
-            cprint('{} прибралась'.format(
-                self.name), color='green')
+            cprint(f'{self.name} прибралась', color='green')
         else:
             self.eat()
 
@@ -280,13 +280,13 @@ class Child(Man):
 
     def sleep(self):
         self.fullness -= 10
-        cprint('{} спит'.format(self.name), color='green')
+        cprint(f'{self.name} спит', color='green')
 
 
 class Cat(Occupant):
 
     def __str__(self):
-        return 'Я - кот ' + super().__str__()
+        return f'Я - кот {super().__str__()}'
 
     def act(self):
         if super().act():
@@ -303,14 +303,14 @@ class Cat(Occupant):
 
     def sleep(self):
         self.fullness -= 10
-        cprint('{} спит'.format(self.name), color='green')
+        cprint(f'{self.name} спит', color='green')
 
     def soil(self):
         self.fullness -= 10
         self.house.mess += 5
-        cprint('{} дерет обои'.format(self.name), color='yellow')
+        cprint(f'{self.name} дерет обои', color='yellow')
 
-    def dying(self, reason='с голоду'):
+    def dying(self, *args, **kwargs):
         if self.fullness <= 0:
             return super().dying()
         return False
@@ -347,9 +347,9 @@ for day in range(1, 366):
         cprint(home, color='cyan')
 
 print('\nВ итоге:')
-print('Денег заработано - {}'.format(House.total_money))
-print('Еды съедено - {}'.format(Occupant.eaten))
-print('Шуб куплено - {}'.format(Wife.closet))
+print(f'Денег заработано - {House.total_money}')
+print(f'Еды съедено - {Occupant.eaten}')
+print(f'Шуб куплено - {Wife.closet}')
 
 ######################################################## Часть вторая
 #
