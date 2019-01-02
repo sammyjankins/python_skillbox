@@ -71,8 +71,8 @@ class Occupant:
 
     def eat(self, max_food=30, fullness_mul=1):
         food = 'Cat' if isinstance(self, Cat) else 'Man'
-        if self.house.food[food] >= max_food:
-            meal = randint(max_food // 3, max_food)
+        meal = randint(max_food // 3, max_food)
+        if self.house.food[food] >= meal:
             Occupant.eaten += meal
             cprint('{} ест'.format(self.name), color='yellow')
             self.fullness += meal * fullness_mul
@@ -167,7 +167,7 @@ class Husband(Adult, Man):
         if super().act():
             if self.happiness < 30:
                 self.gaming()
-            elif self.house.money < 100:
+            elif self.house.money < 150:
                 self.work()
             else:
                 dice = randint(1, 4)
@@ -177,6 +177,10 @@ class Husband(Adult, Man):
                     self.pet_a_cat()
                 else:
                     self.work()
+
+    def eat(self, *args, **kwargs):
+        if not super().eat(*args, **kwargs) and self.house.money < 70:
+            self.work()
 
     def work(self):
         cprint('{} сходил на работу'.format(self.name), color='blue')
@@ -218,17 +222,21 @@ class Wife(Adult, Man):
         if not super().eat(*args, **kwargs):
             self.shopping()
 
+    def out_of_money(self):
+        cprint('{} деньги кончились!'.format(self.name), color='red')
+        cprint('{}, марш работать!'.format(self.husband.name))
+        self.happiness -= 10
+        self.pet_a_cat()  # чтобы не словить депрессию
+
     def shopping(self):
-        if self.house.money >= 50:
+        if self.house.money >= 70:
             cprint('{} сходила в магазин за едой'.format(self.name), color='magenta')
-            self.house.money -= 50
-            self.house.food['Man'] += 40
+            self.house.money -= 70
+            self.house.food['Man'] += 60
             self.house.food['Cat'] += 10
             self.fullness -= 10
         else:
-            cprint('{} деньги кончились!'.format(self.name), color='red')
-            cprint('{}, марш работать!'.format(self.husband.name))
-            self.happiness -= 10
+            self.out_of_money()
 
     def buy_fur_coat(self):
         if self.house.money >= 350:
@@ -238,9 +246,7 @@ class Wife(Adult, Man):
             self.fullness -= 10
             Wife.closet += 1
         else:
-            cprint('{} - не хватает денег на шубу!'.format(self.name), color='red')
-            cprint('{}, марш работать!'.format(self.husband.name))
-            self.happiness -= 10
+            self.out_of_money()
 
     def clean_house(self):
         if self.fullness > 20:
