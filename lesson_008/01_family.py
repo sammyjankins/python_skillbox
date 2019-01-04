@@ -50,10 +50,11 @@ CAT_NAMES = ['Майкл', 'Эдди', 'Роджер', 'Винсент', 'Дуг
 class Occupant:
     eaten = 0
 
-    def __init__(self, name):
+    def __init__(self, name, sim=False):
         self.name = name
         self.house = None
         self.fullness = 30
+        self.sim = sim
 
     def __str__(self):
         return f'{self.name}, сытость - {self.fullness}'
@@ -61,11 +62,11 @@ class Occupant:
     def bind_to_house(self, house):
         self.house = house
         self.fullness -= 10
-        cprint(f'{self.name} вьезжает в дом', color='cyan')
+        self.family_print(f'{self.name} вьезжает в дом', color='cyan', sim=self.sim)
 
     def dying(self, reason='с голоду'):
         if self.fullness <= 0:
-            cprint(f'{self.name} умирает {reason}...', color='red')
+            self.family_print(f'{self.name} умирает {reason}...', color='red', sim=self.sim)
             self.house.someone_is_dead()
             return True
         return False
@@ -75,13 +76,13 @@ class Occupant:
         meal = randint(max_food // 3, max_food)
         if self.house.food[food] >= meal:
             Occupant.eaten += meal
-            cprint(f'{self.name} ест', color='yellow')
+            self.family_print(f'{self.name} ест', color='yellow', sim=self.sim)
             self.fullness += meal * fullness_mul
             self.house.food[food] -= meal
             return True
         else:
             insert = 'кошачьей ' if food == 'Cat' else ''
-            cprint(f'{self.name} хочет есть, но в доме {insert}нет еды', color='red')
+            self.family_print(f'{self.name} хочет есть, но в доме {insert}нет еды', color='red', sim=self.sim)
             return False
 
     def act(self):
@@ -91,6 +92,10 @@ class Occupant:
             self.eat()
             return False
         return True
+
+    def family_print(self, words, color, sim):
+        if not sim:
+            cprint(f'{words}', color=color)
 
 
 class Man(Occupant):
@@ -105,7 +110,7 @@ class Man(Occupant):
     def pet_a_cat(self):
         self.happiness += 5
         self.fullness -= 10
-        print(f'{self.name} гладит кота')
+        self.family_print(f'{self.name} гладит кота', color='cyan', sim=self.sim)
 
 
 # чтобы счастье менялось только у взрослых
@@ -192,13 +197,13 @@ class Husband(Adult, Man):
             self.work()
 
     def work(self):
-        cprint(f'{self.name} сходил на работу', color='blue')
+        self.family_print(f'{self.name} сходил на работу', color='blue', sim=self.sim)
         self.house.increase_of_capital(self.salary)
         self.fullness -= 10
         self.happiness -= 5
 
     def gaming(self):
-        cprint(f'{self.name} играл в Silent Hill целый день', color='green')
+        self.family_print(f'{self.name} играл в Silent Hill целый день', color='green', sim=self.sim)
         self.fullness -= 10
         self.happiness += 20
 
@@ -234,14 +239,14 @@ class Wife(Adult, Man):
             self.shopping()
 
     def out_of_money(self):
-        cprint(f'{self.name} деньги кончились!', color='red')
-        cprint(f'{self.husband.name}, марш работать!')
+        self.family_print(f'{self.name} деньги кончились!\n{self.husband.name}, марш работать!', color='red',
+                          sim=self.sim)
         self.happiness -= 10
         self.pet_a_cat()  # чтобы не словить депрессию
 
     def shopping(self):
         if self.house.money >= 70:
-            cprint(f'{self.name} сходила в магазин за едой', color='magenta')
+            self.family_print(f'{self.name} сходила в магазин за едой', color='magenta', sim=self.sim)
             self.house.money -= 70
             self.house.food['Man'] += 60
             self.house.food['Cat'] += 10
@@ -251,7 +256,7 @@ class Wife(Adult, Man):
 
     def buy_fur_coat(self):
         if self.house.money >= 350:
-            cprint(f'{self.name} купила новую шубу', color='magenta')
+            self.family_print(f'{self.name} купила новую шубу', color='magenta', sim=self.sim)
             self.house.money -= 350
             self.happiness += 60
             self.fullness -= 10
@@ -267,7 +272,7 @@ class Wife(Adult, Man):
                 self.house.mess = 0
             self.fullness -= 10
             self.happiness -= 25
-            cprint(f'{self.name} прибралась', color='green')
+            self.family_print(f'{self.name} прибралась', color='green', sim=self.sim)
         else:
             self.eat()
 
@@ -290,7 +295,7 @@ class Child(Man):
 
     def sleep(self):
         self.fullness -= 10
-        cprint(f'{self.name} спит', color='green')
+        self.family_print(f'{self.name} спит', color='green', sim=self.sim)
 
 
 class Cat(Occupant):
@@ -313,12 +318,12 @@ class Cat(Occupant):
 
     def sleep(self):
         self.fullness -= 10
-        cprint(f'{self.name} спит', color='green')
+        self.family_print(f'{self.name} спит', color='green', sim=self.sim)
 
     def soil(self):
         self.fullness -= 10
         self.house.mess += 5
-        cprint(f'{self.name} дерет обои', color='yellow')
+        self.family_print(f'{self.name} дерет обои', color='yellow', sim=self.sim)
 
 
 class Simulation:
@@ -329,6 +334,12 @@ class Simulation:
 
     def experiment(self, salary):
         cats = 1
+        survived = True
+        while survived:
+            pass
+
+    def cycle(self, cats, salary):
+        pass
 
 
 home = House()
