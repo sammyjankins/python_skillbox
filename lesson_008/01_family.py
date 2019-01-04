@@ -64,9 +64,11 @@ class Occupant:
         cprint(f'{self.name} вьезжает в дом', color='cyan')
 
     def dying(self, reason='с голоду'):
-        cprint(f'{self.name} умирает {reason}...', color='red')
-        self.house.someone_is_dead()
-        return True
+        if self.fullness <= 0:
+            cprint(f'{self.name} умирает {reason}...', color='red')
+            self.house.someone_is_dead()
+            return True
+        return False
 
     def eat(self, max_food=30, fullness_mul=1):
         food = 'Cat' if isinstance(self, Cat) else 'Man'
@@ -100,12 +102,6 @@ class Man(Occupant):
     def __str__(self):
         return f'Я - {super().__str__()}, уровень счастья - {self.happiness}'
 
-    def dying(self, reason='с голоду'):
-        if self.fullness <= 0 or self.happiness <= 10:
-            reason = reason if self.fullness <= 0 else 'от депрессии'
-            return super().dying(reason)
-        return False
-
     def pet_a_cat(self):
         self.happiness += 5
         self.fullness -= 10
@@ -119,6 +115,12 @@ class Adult(Man):
         if self.house.mess > 90:
             self.happiness -= 10
         return super().act()
+
+    def dying(self, reason='с голоду'):
+        if not super().dying(reason) and self.happiness <= 10:
+            reason = reason if self.fullness <= 0 else 'от депрессии'
+            return super().dying(reason)
+        return False
 
 
 class House:
@@ -309,11 +311,6 @@ class Cat(Occupant):
         self.fullness -= 10
         self.house.mess += 5
         cprint(f'{self.name} дерет обои', color='yellow')
-
-    def dying(self, *args, **kwargs):
-        if self.fullness <= 0:
-            return super().dying()
-        return False
 
 
 home = House()
