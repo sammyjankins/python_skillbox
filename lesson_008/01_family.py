@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from termcolor import cprint
-from random import randint, choice
+from random import randint, choice, sample
 
 ######################################################## Часть первая
 #
@@ -153,12 +153,20 @@ class House:
         self.money += amount
         House.total_money += amount
 
+    def food_incident(self):
+        for key in self.food:
+            self.food[key] = 0
+
+    def money_incident(self):
+        self.money = 0
+
 
 class Husband(Adult, Man):
 
-    def __init__(self, name):
+    def __init__(self, name, salary):
         super().__init__(name)
         self.wife = None
+        self.salary = salary
 
     def to_marry(self, wife):
         self.wife = wife
@@ -185,7 +193,7 @@ class Husband(Adult, Man):
 
     def work(self):
         cprint(f'{self.name} сходил на работу', color='blue')
-        self.house.increase_of_capital(150)
+        self.house.increase_of_capital(self.salary)
         self.fullness -= 10
         self.happiness -= 5
 
@@ -313,8 +321,18 @@ class Cat(Occupant):
         cprint(f'{self.name} дерет обои', color='yellow')
 
 
+class Simulation:
+
+    def __init__(self, money_incidents, food_incidents):
+        self.money_incidents = money_incidents
+        self.food_incidents = food_incidents
+
+    def experiment(self, salary):
+        cats = 1
+
+
 home = House()
-serge = Husband(name='Сережа')
+serge = Husband(name='Сережа', salary=150)
 masha = Wife(name='Маша')
 kolya = Child(name='Коля')
 cat = Cat(choice(CAT_NAMES))
@@ -331,7 +349,7 @@ home.accept_occupant(cat)
 
 for day in range(1, 366):
     if home.its_ok:
-        cprint('\n================== День {} =================='.format(day), color='red')
+        cprint(f'\n================== День {day} ==================', color='red')
         serge.act()
         masha.act()
         kolya.act()
