@@ -100,8 +100,8 @@ class Occupant:
 
 class Man(Occupant):
 
-    def __init__(self, name):
-        super().__init__(name)
+    def __init__(self, name, *args, **kwargs):
+        super().__init__(name, *args, **kwargs)
         self.happiness = 100
 
     def __str__(self):
@@ -140,8 +140,8 @@ class House:
         self.its_ok = True
 
     def __str__(self):
-        return f'В доме еды осталось - {self.food["Man"]}, кошачьей еды - {self.food["Cat"]}' \
-               f', денег - {self.money}, уровень беспорядка - {self.mess}'
+        return f'''В доме еды осталось - {self.food["Man"]}, кошачьей еды - {self.food["Cat"]},
+денег - {self.money}, уровень беспорядка - {self.mess}'''
 
     def accept_occupant(self, occupant):
         if isinstance(occupant, (Man, Cat)):
@@ -168,8 +168,8 @@ class House:
 
 class Husband(Adult, Man):
 
-    def __init__(self, name, salary):
-        super().__init__(name)
+    def __init__(self, name, salary, *args, **kwargs):
+        super().__init__(name, *args, **kwargs)
         self.wife = None
         self.salary = salary
 
@@ -211,8 +211,8 @@ class Husband(Adult, Man):
 class Wife(Adult, Man):
     closet = 0
 
-    def __init__(self, name):
-        super().__init__(name)
+    def __init__(self, name, *args, **kwargs):
+        super().__init__(name, *args, **kwargs)
         self.husband = None
 
     def act(self):
@@ -338,44 +338,47 @@ class Simulation:
         while survived:
             pass
 
-    def cycle(self, cats, salary):
-        pass
+    # если sim == True, вывода на экран не будет
+    def cycle(self, cats=1, salary=150, sim=True):
+        home = House()
+        serge = Husband(name='Сережа', salary=salary, sim=sim)
+        masha = Wife(name='Маша', sim=sim)
+        kolya = Child(name='Коля', sim=sim)
+        cat = Cat(name=choice(CAT_NAMES), sim=sim)
+
+        # свадьба
+        serge.to_marry(masha)
+
+        # переезд
+        home.accept_occupant(serge)
+        home.accept_occupant(masha)
+        home.accept_occupant(kolya)
+        home.accept_occupant(cat)
+
+        for day in range(1, 366):
+            if home.its_ok:
+                if not sim:
+                    cprint(f'\n================== День {day} ==================', color='red')
+                serge.act()
+                masha.act()
+                kolya.act()
+                cat.act()
+                home.act()
+                if not sim:
+                    cprint(serge, color='cyan')
+                    cprint(masha, color='cyan')
+                    cprint(kolya, color='cyan')
+                    cprint(cat, color='cyan')
+                    cprint(home, color='cyan')
+        if not sim:
+            print('\nВ итоге:')
+            print(f'Денег заработано - {House.total_money}')
+            print(f'Еды съедено - {Occupant.eaten}')
+            print(f'Шуб куплено - {Wife.closet}')
 
 
-home = House()
-serge = Husband(name='Сережа', salary=150)
-masha = Wife(name='Маша')
-kolya = Child(name='Коля')
-cat = Cat(choice(CAT_NAMES))
-
-# свадьба
-serge.to_marry(masha)
-
-# переезд
-
-home.accept_occupant(serge)
-home.accept_occupant(masha)
-home.accept_occupant(kolya)
-home.accept_occupant(cat)
-
-for day in range(1, 366):
-    if home.its_ok:
-        cprint(f'\n================== День {day} ==================', color='red')
-        serge.act()
-        masha.act()
-        kolya.act()
-        cat.act()
-        home.act()
-        cprint(serge, color='cyan')
-        cprint(masha, color='cyan')
-        cprint(kolya, color='cyan')
-        cprint(cat, color='cyan')
-        cprint(home, color='cyan')
-
-print('\nВ итоге:')
-print(f'Денег заработано - {House.total_money}')
-print(f'Еды съедено - {Occupant.eaten}')
-print(f'Шуб куплено - {Wife.closet}')
+life = Simulation(1, 1)
+life.cycle(sim=False)
 
 ######################################################## Часть вторая
 #
