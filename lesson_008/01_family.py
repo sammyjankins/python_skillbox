@@ -100,21 +100,20 @@ class Occupant:
 
 class Man(Occupant):
 
-    def __init__(self, name, *args, **kwargs):
-        super().__init__(name, *args, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.happiness = 100
 
     def __str__(self):
         return f'Я - {super().__str__()}, уровень счастья - {self.happiness}'
 
-    def pet_a_cat(self):
-        self.happiness += 5
-        self.fullness -= 10
-        self.family_print(f'{self.name} гладит кота', color='cyan', sim=self.sim)
-
 
 # чтобы счастье менялось только у взрослых
 class Adult(Man):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.spouse = None
 
     def act(self):
         if self.house.mess > 90:
@@ -126,6 +125,17 @@ class Adult(Man):
             reason = reason if self.fullness <= 0 else 'от депрессии'
             return super().dying(reason)
         return False
+
+    def pet_a_cat(self):
+        self.happiness += 5
+        self.fullness -= 10
+        self.family_print(f'{self.name} гладит кота', color='blue', sim=self.sim)
+
+    # свадьба
+    def wedding(self, spouse=None):
+        if not self.spouse:
+            self.spouse = spouse
+            spouse.wedding(spouse=self)
 
 
 class House:
@@ -168,14 +178,9 @@ class House:
 
 class Husband(Adult, Man):
 
-    def __init__(self, name, salary, *args, **kwargs):
-        super().__init__(name, *args, **kwargs)
-        self.wife = None
+    def __init__(self, salary, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.salary = salary
-
-    def to_marry(self, wife):
-        self.wife = wife
-        self.wife.to_marry(self)
 
     def act(self):
         if super().act():
@@ -211,10 +216,6 @@ class Husband(Adult, Man):
 class Wife(Adult, Man):
     closet = 0
 
-    def __init__(self, name, *args, **kwargs):
-        super().__init__(name, *args, **kwargs)
-        self.husband = None
-
     def act(self):
         if super().act():
             if self.happiness <= 35:
@@ -239,7 +240,7 @@ class Wife(Adult, Man):
             self.shopping()
 
     def out_of_money(self):
-        self.family_print(f'{self.name} деньги кончились!\n{self.husband.name}, марш работать!', color='red',
+        self.family_print(f'{self.name} деньги кончились!\n{self.spouse.name}, марш работать!', color='red',
                           sim=self.sim)
         self.happiness -= 10
         self.pet_a_cat()  # чтобы не словить депрессию
@@ -275,9 +276,6 @@ class Wife(Adult, Man):
             self.family_print(f'{self.name} прибралась', color='green', sim=self.sim)
         else:
             self.eat()
-
-    def to_marry(self, husband):
-        self.husband = husband
 
 
 class Child(Man):
@@ -347,7 +345,7 @@ class Simulation:
         cat = Cat(name=choice(CAT_NAMES), sim=sim)
 
         # свадьба
-        serge.to_marry(masha)
+        serge.wedding(masha)
 
         # переезд
         home.accept_occupant(serge)
