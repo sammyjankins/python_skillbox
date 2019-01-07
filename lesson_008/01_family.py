@@ -72,7 +72,10 @@ class Occupant:
         return False
 
     def eat(self, max_food=30, fullness_mul=1):
-        food = 'Cat' if isinstance(self, Cat) else 'Man'
+        for value in self.__class__.__mro__:
+            food = value.__name__
+            if food in list(self.house.food.keys()):
+                break
         meal = randint(max_food // 3, max_food)
         if self.house.food[food] >= meal:
             Occupant.eaten += meal
@@ -143,8 +146,7 @@ class House:
 
     def __init__(self):
         self.money = 100
-        man_food = 50
-        self.food = {'Man': man_food, 'Cat': 30}
+        self.food = {'Man': 50, 'Cat': 30}
         self.mess = 0
         self.occupants = []
         self.its_ok = True
