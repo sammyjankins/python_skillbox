@@ -344,10 +344,19 @@ class Simulation:
         self.food_incidents = food_incidents
 
     def experiment(self, salary):
-        cats = 1
-        survived = True
-        while survived:
-            pass
+        cats = 0
+        while True:
+            cats += 1
+            survivals = 0
+            for _ in range(3):
+                if self.cycle(money_incidents=self.money_incidents,
+                              food_incidents=self.food_incidents,
+                              cats=cats,
+                              salary=salary,
+                              sim=True):
+                    survivals += 1
+            if survivals < 2:
+                return cats
 
     # если sim == True, вывода на экран не будет
     def cycle(self, money_incidents=1, food_incidents=1, cats=2, salary=150, sim=True, ):
@@ -382,7 +391,7 @@ class Simulation:
                 if not sim:
                     for occupant in home.occupants:
                         cprint(occupant, color='cyan')
-                cprint(home, color='cyan')
+                    cprint(home, color='cyan')
 
         if not sim:
             print('\nВ итоге:')
@@ -394,7 +403,7 @@ class Simulation:
 
 
 life = Simulation(1, 1)
-life.cycle(sim=False)
+print(life.experiment(salary=150))
 
 ######################################################## Часть вторая
 #
