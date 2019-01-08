@@ -48,7 +48,6 @@ CAT_NAMES = ['Майкл', 'Эдди', 'Роджер', 'Винсент', 'Дуг
 # Класс жителя дома, здесь будут скомпилированы некоторые атрибуты и методы, справедливые как для
 # людей, так и для котов
 class Occupant:
-    eaten = 0
 
     def __init__(self, name, sim=False):
         self.name = name
@@ -78,7 +77,6 @@ class Occupant:
                 break
         meal = randint(max_food // 3, max_food)
         if self.house.food[food] >= meal:
-            Occupant.eaten += meal
             self.family_print(f'{self.name} ест', color='yellow', sim=self.sim)
             self.fullness += meal * fullness_mul
             self.house.food[food] -= meal
@@ -142,7 +140,6 @@ class Adult(Man):
 
 
 class House:
-    total_money = 0
 
     def __init__(self, sim):
         self.sim = sim
@@ -172,7 +169,6 @@ class House:
 
     def increase_of_capital(self, amount):
         self.money += amount
-        House.total_money += amount
 
     def food_incident(self):
         for key in self.food:
@@ -224,7 +220,6 @@ class Husband(Adult, Man):
 
 
 class Wife(Adult, Man):
-    closet = 0
 
     def act(self):
         if super().act():
@@ -274,7 +269,6 @@ class Wife(Adult, Man):
             self.house.money -= 350
             self.happiness += 60
             self.fullness -= 10
-            Wife.closet += 1
         else:
             self.out_of_money()
 
@@ -392,12 +386,6 @@ class Simulation:
                     for occupant in home.occupants:
                         cprint(occupant, color='cyan')
                     cprint(home, color='cyan')
-
-        if not sim:
-            print('\nВ итоге:')
-            print(f'Денег заработано - {House.total_money}')
-            print(f'Еды съедено - {Occupant.eaten}')
-            print(f'Шуб куплено - {Wife.closet}')
 
         return True if home.its_ok else False
 
