@@ -144,12 +144,14 @@ class Adult(Man):
 class House:
     total_money = 0
 
-    def __init__(self):
+    def __init__(self, sim):
+        self.sim = sim
         self.money = 100
         self.food = {'Man': 50, 'Cat': 30}
         self.mess = 0
         self.occupants = []
         self.its_ok = True
+        self.cats = 0
 
     def __str__(self):
         return f'''В доме еды осталось - {self.food["Man"]}, кошачьей еды - {self.food["Cat"]},
@@ -158,6 +160,8 @@ class House:
     def accept_occupant(self, occupant):
         if isinstance(occupant, (Man, Cat)):
             self.occupants.append(occupant)
+            if isinstance(occupant, Cat):
+                self.cats += 1
             occupant.bind_to_house(self)
 
     def someone_is_dead(self):
@@ -173,9 +177,13 @@ class House:
     def food_incident(self):
         for key in self.food:
             self.food[key] = 0
+        if not self.sim:
+            cprint('Из холодильника внезапно пропала вся еда', color='red')
 
     def money_incident(self):
         self.money = 0
+        if not self.sim:
+            cprint('Из дома внезапно пропали все деньги', color='red')
 
 
 class Husband(Adult, Man):
@@ -248,11 +256,14 @@ class Wife(Adult, Man):
         self.pet_a_cat()  # чтобы не словить депрессию
 
     def shopping(self):
-        if self.house.money >= 70:
+        man_food_price = 20 * (len(self.house.occupants) - self.house.cats)
+        cat_food_price = 10 * self.house.cats
+        food_price = man_food_price + cat_food_price
+        if self.house.money >= food_price:
             self.family_print(f'{self.name} сходила в магазин за едой', color='magenta', sim=self.sim)
-            self.house.money -= 70
-            self.house.food['Man'] += 60
-            self.house.food['Cat'] += 10
+            self.house.money -= food_price
+            self.house.food['Man'] += man_food_price
+            self.house.food['Cat'] += cat_food_price
             self.fullness -= 10
         else:
             self.out_of_money()
@@ -339,12 +350,11 @@ class Simulation:
             pass
 
     # если sim == True, вывода на экран не будет
-    def cycle(self, cats=1, salary=150, sim=True):
-        home = House()
+    def cycle(self, money_incidents=1, food_incidents=1, cats=2, salary=150, sim=True, ):
+        home = House(sim)
         serge = Husband(name='Сережа', salary=salary, sim=sim)
         masha = Wife(name='Маша', sim=sim)
         kolya = Child(name='Коля', sim=sim)
-        cat = Cat(name=choice(CAT_NAMES), sim=sim)
 
         # свадьба
         serge.wedding(masha)
@@ -353,28 +363,34 @@ class Simulation:
         home.accept_occupant(serge)
         home.accept_occupant(masha)
         home.accept_occupant(kolya)
-        home.accept_occupant(cat)
 
-        for day in range(1, 366):
+        for cat in range(cats):
+            home.accept_occupant(Cat(name=choice(CAT_NAMES), sim=sim))
+        year = range(1, 366)
+        incidents = {'food': sample(year, food_incidents), 'money': sample(year, money_incidents)}
+
+        for day in year:
             if home.its_ok:
                 if not sim:
                     cprint(f'\n================== День {day} ==================', color='red')
-                serge.act()
-                masha.act()
-                kolya.act()
-                cat.act()
+                for accident in incidents:
+                    if day in incidents[accident]:
+                        home.food_incident() if accident == 'food' else home.money_incident()
                 home.act()
+                for occupant in home.occupants:
+                    occupant.act()
                 if not sim:
-                    cprint(serge, color='cyan')
-                    cprint(masha, color='cyan')
-                    cprint(kolya, color='cyan')
-                    cprint(cat, color='cyan')
-                    cprint(home, color='cyan')
+                    for occupant in home.occupants:
+                        cprint(occupant, color='cyan')
+                cprint(home, color='cyan')
+
         if not sim:
             print('\nВ итоге:')
             print(f'Денег заработано - {House.total_money}')
             print(f'Еды съедено - {Occupant.eaten}')
             print(f'Шуб куплено - {Wife.closet}')
+
+        return True if home.its_ok else False
 
 
 life = Simulation(1, 1)
