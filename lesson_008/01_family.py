@@ -359,7 +359,7 @@ class Simulation:
                 return cats
 
     # если sim == True, вывода на экран не будет
-    def cycle(self, money_incidents=1, food_incidents=1, cats=2, salary=150, sim=True, ):
+    def cycle(self, money_incidents=1, food_incidents=1, cats=1, salary=150, sim=True, ):
         home = House(sim)
         serge = Husband(name='Сережа', salary=salary, sim=sim)
         masha = Wife(name='Маша', sim=sim)
@@ -402,9 +402,22 @@ class Simulation:
         return True if home.its_ok else False
 
 
-life = Simulation(1, 1)
-print(life.experiment(salary=150))
+for food_incidents in range(6):
+    for money_incidents in range(6):
+        cprint('Внезапных исчезновений еды: ', end='', color='cyan')
+        cprint(food_incidents, color='red')
+        cprint('Внезапных исчезновений денег: ', end='', color='cyan')
+        cprint(money_incidents, color='red')
+        life = Simulation(food_incidents, money_incidents)
+        for salary in range(50, 401, 50):
+            cprint('При зарплате ', end='', color='magenta')
+            cprint(salary, color='green', end='')
+            cprint(' максимально можно прокормить ', end='', color='magenta')
+            cprint(life.experiment(salary=salary), color='yellow', end='')
+            cprint(' котов', color='magenta')
 
+life = Simulation(1, 1)
+life.cycle(sim=False)
 ######################################################## Часть вторая
 #
 # После подтверждения учителем первой части надо
