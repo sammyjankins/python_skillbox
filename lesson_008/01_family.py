@@ -71,12 +71,14 @@ class Occupant:
         return False
 
     def eat(self, max_food=30, fullness_mul=1):
+        # TODO: Напишите по-русски, что вы тут хотите сделать. Я почти уверен, что то, что вы хотите, можно сделать без ковыряния в служебных полях класса
         for value in self.__class__.__mro__:
             food = value.__name__
-            if food in list(self.house.food.keys()):
+            if food in list(self.house.food.keys()):  # TODO: list не нужен
                 break
         meal = randint(max_food // 3, max_food)
-        if self.house.food[food] >= meal:
+        if self.house.food[food] >= meal:  # TODO: значение food остается от последней итерации цикла выше. Если вы так и хотели, то лучше это сделать явно.
+                                           # TODO: Ну и название переменной смыслу явно не соответствует.
             self.family_print(f'{self.name} ест', color='yellow', sim=self.sim)
             self.fullness += meal * fullness_mul
             self.house.food[food] -= meal
@@ -144,7 +146,7 @@ class House:
     def __init__(self, sim):
         self.sim = sim
         self.money = 100
-        self.food = {'Man': 50, 'Cat': 30}
+        self.food = {'Man': 50, 'Cat': 30}   # TODO: вообще, ключами можно сделать прямо классовые переменные (ну то есть без кавычек)
         self.mess = 0
         self.occupants = []
         self.its_ok = True
@@ -155,7 +157,7 @@ class House:
 денег - {self.money}, уровень беспорядка - {self.mess}'''
 
     def accept_occupant(self, occupant):
-        if isinstance(occupant, (Man, Cat)):
+        if isinstance(occupant, (Man, Cat)):  # TODO: Кстати, если в isinstance передать базоввый класс этих двух, то программа отработает корректно
             self.occupants.append(occupant)
             if isinstance(occupant, Cat):
                 self.cats += 1
@@ -185,7 +187,7 @@ class House:
 class Husband(Adult, Man):
 
     def __init__(self, salary, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)  # TODO: чей инит тут вызовется (вопрос на засыпку (: )?
         self.salary = salary
 
     def act(self):
