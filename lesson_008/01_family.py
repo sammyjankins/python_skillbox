@@ -49,11 +49,12 @@ CAT_NAMES = ['Майкл', 'Эдди', 'Роджер', 'Винсент', 'Дуг
 # людей, так и для котов
 class Occupant:
 
-    def __init__(self, name, sim=False):
+    def __init__(self, name, show=True):
         self.name = name
         self.house = None
         self.fullness = 30
-        self.sim = sim
+        self.show = show
+        self.is_dead = False
 
     def __str__(self):
         return f'{self.name}, сытость - {self.fullness}'
@@ -61,14 +62,14 @@ class Occupant:
     def bind_to_house(self, house):
         self.house = house
         self.fullness -= 10
-        self.family_print(f'{self.name} вьезжает в дом', color='cyan', sim=self.sim)
+        self.family_print(text='въезжает в дом', color='cyan')
 
-    def dying(self, reason='с голоду'):
+    def dying(self):
         if self.fullness <= 0:
-            self.family_print(f'{self.name} умирает {reason}...', color='red', sim=self.sim)
+            self.family_print(text=f'помер с голоду', color='red')
+            self.is_dead = True
             self.house.someone_is_dead()
-            return True
-        return False
+        return self.is_dead
 
     def eat(self, max_food=30, fullness_mul=1):
         # TODO: Напишите по-русски, что вы тут хотите сделать. Я почти уверен, что то, что вы хотите, можно сделать без ковыряния в служебных полях класса
@@ -77,15 +78,16 @@ class Occupant:
             if food in list(self.house.food.keys()):  # TODO: list не нужен
                 break
         meal = randint(max_food // 3, max_food)
-        if self.house.food[food] >= meal:  # TODO: значение food остается от последней итерации цикла выше. Если вы так и хотели, то лучше это сделать явно.
-                                           # TODO: Ну и название переменной смыслу явно не соответствует.
-            self.family_print(f'{self.name} ест', color='yellow', sim=self.sim)
+        if self.house.food[
+            food] >= meal:  # TODO: значение food остается от последней итерации цикла выше. Если вы так и хотели, то лучше это сделать явно.
+            # TODO: Ну и название переменной смыслу явно не соответствует.
+            self.family_print(f'ест', color='yellow')
             self.fullness += meal * fullness_mul
             self.house.food[food] -= meal
             return True
         else:
             insert = 'кошачьей ' if food == 'Cat' else ''
-            self.family_print(f'{self.name} хочет есть, но в доме {insert}нет еды', color='red', sim=self.sim)
+            self.family_print(f'хочет есть, но в доме {insert}нет еды', color='red')
             return False
 
     def act(self):
@@ -96,9 +98,9 @@ class Occupant:
             return False
         return True
 
-    def family_print(self, words, color, sim):
-        if not sim:
-            cprint(f'{words}', color=color)
+    def family_print(self, text, color):
+        if self.show:
+            cprint(f'{self.name} {text}', color=color)
 
 
 class Man(Occupant):
@@ -123,16 +125,18 @@ class Adult(Man):
             self.happiness -= 10
         return super().act()
 
-    def dying(self, reason='с голоду'):
-        if not super().dying(reason) and self.happiness <= 10:
-            reason = reason if self.fullness <= 0 else 'от депрессии'
-            return super().dying(reason)
-        return False
+    def dying(self):
+        if not super().dying():
+            if self.happiness <= 10:
+                self.family_print(text=f'помер от депрессии', color='red')
+                self.house.someone_is_dead()
+                self.is_dead = True
+        return self.is_dead
 
     def pet_a_cat(self):
         self.happiness += 5
         self.fullness -= 10
-        self.family_print(f'{self.name} гладит кота', color='blue', sim=self.sim)
+        self.family_print(f'гладит кота', color='blue')
 
     # свадьба
     def wedding(self, spouse=None):
@@ -143,10 +147,11 @@ class Adult(Man):
 
 class House:
 
-    def __init__(self, sim):
-        self.sim = sim
+    def __init__(self, show=True):
+        self.show = show
         self.money = 100
-        self.food = {'Man': 50, 'Cat': 30}   # TODO: вообще, ключами можно сделать прямо классовые переменные (ну то есть без кавычек)
+        self.food = {'Man': 50,
+                     'Cat': 30}  # TODO: вообще, ключами можно сделать прямо классовые переменные (ну то есть без кавычек)
         self.mess = 0
         self.occupants = []
         self.its_ok = True
@@ -157,7 +162,8 @@ class House:
 денег - {self.money}, уровень беспорядка - {self.mess}'''
 
     def accept_occupant(self, occupant):
-        if isinstance(occupant, (Man, Cat)):  # TODO: Кстати, если в isinstance передать базоввый класс этих двух, то программа отработает корректно
+        if isinstance(occupant, (Man,
+                                 Cat)):  # TODO: Кстати, если в isinstance передать базоввый класс этих двух, то программа отработает корректно
             self.occupants.append(occupant)
             if isinstance(occupant, Cat):
                 self.cats += 1
@@ -175,20 +181,24 @@ class House:
     def food_incident(self):
         for key in self.food:
             self.food[key] = 0
-        if not self.sim:
+        if self.show:
             cprint('Из холодильника внезапно пропала вся еда', color='red')
 
     def money_incident(self):
         self.money = 0
-        if not self.sim:
+        if self.show:
             cprint('Из дома внезапно пропали все деньги', color='red')
 
 
-class Husband(Adult, Man):
+# думаю вызвался бы инит Adult. Но на этот раз множественное наследование убрал, Adult наследуется от Human (ранее Man)
+class Husband(Adult):
 
     def __init__(self, salary, *args, **kwargs):
-        super().__init__(*args, **kwargs)  # TODO: чей инит тут вызовется (вопрос на засыпку (: )?
+        super().__init__(*args, **kwargs)
         self.salary = salary
+
+    def __str__(self):
+        return f'{super().__str__()}, моя зп - {self.salary}'
 
     def act(self):
         if super().act():
@@ -210,18 +220,18 @@ class Husband(Adult, Man):
             self.work()
 
     def work(self):
-        self.family_print(f'{self.name} сходил на работу', color='blue', sim=self.sim)
+        self.family_print(f'сходил на работу', color='blue')
         self.house.increase_of_capital(self.salary)
         self.fullness -= 10
         self.happiness -= 5
 
     def gaming(self):
-        self.family_print(f'{self.name} играл в Silent Hill целый день', color='green', sim=self.sim)
+        self.family_print(f'играл в DOOM целый день', color='green')
         self.fullness -= 10
         self.happiness += 20
 
 
-class Wife(Adult, Man):
+class Wife(Adult):
 
     def act(self):
         if super().act():
@@ -247,8 +257,7 @@ class Wife(Adult, Man):
             self.shopping()
 
     def out_of_money(self):
-        self.family_print(f'{self.name} деньги кончились!\n{self.spouse.name}, марш работать!', color='red',
-                          sim=self.sim)
+        self.family_print(f'деньги кончились!\n{self.spouse.name}, марш работать!', color='red')
         self.happiness -= 10
         self.pet_a_cat()  # чтобы не словить депрессию
 
@@ -257,7 +266,7 @@ class Wife(Adult, Man):
         cat_food_price = 10 * self.house.cats
         food_price = man_food_price + cat_food_price
         if self.house.money >= food_price:
-            self.family_print(f'{self.name} сходила в магазин за едой', color='magenta', sim=self.sim)
+            self.family_print(f'сходила в магазин за едой', color='magenta')
             self.house.money -= food_price
             self.house.food['Man'] += man_food_price
             self.house.food['Cat'] += cat_food_price
@@ -267,7 +276,7 @@ class Wife(Adult, Man):
 
     def buy_fur_coat(self):
         if self.house.money >= 350:
-            self.family_print(f'{self.name} купила новую шубу', color='magenta', sim=self.sim)
+            self.family_print(f'купила новую шубу', color='magenta')
             self.house.money -= 350
             self.happiness += 60
             self.fullness -= 10
@@ -282,7 +291,7 @@ class Wife(Adult, Man):
                 self.house.mess = 0
             self.fullness -= 10
             self.happiness -= 25
-            self.family_print(f'{self.name} прибралась', color='green', sim=self.sim)
+            self.family_print(f'прибралась', color='green')
         else:
             self.eat()
 
@@ -302,7 +311,7 @@ class Child(Man):
 
     def sleep(self):
         self.fullness -= 10
-        self.family_print(f'{self.name} спит', color='green', sim=self.sim)
+        self.family_print(f'спит', color='green')
 
 
 class Cat(Occupant):
@@ -318,24 +327,24 @@ class Cat(Occupant):
             elif dice == 2:
                 self.sleep()
             else:
-                self.soil()
+                self.spoil()
 
     def eat(self, max_food=10, fullness_mul=2):
         super().eat(max_food, fullness_mul)
 
     def sleep(self):
         self.fullness -= 10
-        self.family_print(f'{self.name} спит', color='green', sim=self.sim)
+        self.family_print(f'спит', color='green')
 
-    def soil(self):
+    def spoil(self):
         self.fullness -= 10
         self.house.mess += 5
-        self.family_print(f'{self.name} дерет обои', color='yellow', sim=self.sim)
+        self.family_print(f'дерет обои', color='yellow')
 
 
 class Simulation:
 
-    def __init__(self, money_incidents, food_incidents):
+    def __init__(self, money_incidents=1, food_incidents=1):
         self.money_incidents = money_incidents
         self.food_incidents = food_incidents
 
@@ -349,17 +358,17 @@ class Simulation:
                               food_incidents=self.food_incidents,
                               cats=cats,
                               salary=salary,
-                              sim=True):
+                              show=False):
                     survivals += 1
             if survivals < 2:
                 return cats
 
     # если sim == True, вывода на экран не будет
-    def cycle(self, money_incidents=1, food_incidents=1, cats=1, salary=150, sim=True, ):
-        home = House(sim)
-        serge = Husband(name='Сережа', salary=salary, sim=sim)
-        masha = Wife(name='Маша', sim=sim)
-        kolya = Child(name='Коля', sim=sim)
+    def cycle(self, money_incidents=1, food_incidents=1, cats=1, salary=150, show=True):
+        home = House(show)
+        serge = Husband(name='Сережа', salary=salary, show=show)
+        masha = Wife(name='Маша', show=show)
+        kolya = Child(name='Коля', show=show)
 
         # свадьба
         serge.wedding(masha)
@@ -370,13 +379,13 @@ class Simulation:
         home.accept_occupant(kolya)
 
         for cat in range(cats):
-            home.accept_occupant(Cat(name=choice(CAT_NAMES), sim=sim))
+            home.accept_occupant(Cat(name=choice(CAT_NAMES), show=show))
         year = range(1, 366)
         incidents = {'food': sample(year, food_incidents), 'money': sample(year, money_incidents)}
 
         for day in year:
             if home.its_ok:
-                if not sim:
+                if show:
                     cprint(f'\n================== День {day} ==================', color='red')
                 for accident in incidents:
                     if day in incidents[accident]:
@@ -384,12 +393,12 @@ class Simulation:
                 home.act()
                 for occupant in home.occupants:
                     occupant.act()
-                if not sim:
+                if show:
                     for occupant in home.occupants:
                         cprint(occupant, color='cyan')
                     cprint(home, color='cyan')
 
-        return True if home.its_ok else False
+        return home.its_ok
 
 
 for food_incidents in range(6):
@@ -405,9 +414,9 @@ for food_incidents in range(6):
             cprint(' максимально можно прокормить ', end='', color='magenta')
             cprint(life.experiment(salary=salary), color='yellow', end='')
             cprint(' котов', color='magenta')
-
-life = Simulation(1, 1)
-life.cycle(sim=False)
+#
+# life = Simulation(1, 1)
+# life.cycle(show=True)
 ######################################################## Часть вторая
 #
 # После подтверждения учителем первой части надо
