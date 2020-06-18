@@ -1,45 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from termcolor import cprint
-from random import randint, choice, sample
-
-######################################################## Часть первая
-#
-# Создать модель жизни небольшой семьи.
-#
-# Каждый день участники жизни могут делать только одно действие.
-# Все вместе они должны прожить год и не умереть.
-#
-# Муж может:
-#   есть,
-#   играть в WoT,
-#   ходить на работу,
-# Жена может:
-#   есть,
-#   покупать продукты,
-#   покупать шубу,
-#   убираться в доме,
-
-# Все они живут в одном доме, дом характеризуется:
-#   кол-во денег в тумбочке (в начале - 100)
-#   кол-во еды в холодильнике (в начале - 50)
-#   кол-во грязи (в начале - 0)
-#
-# У людей есть имя, степень сытости (в начале - 30) и степень счастья (в начале - 100).
-#
-# Любое действие, кроме "есть", приводит к уменьшению степени сытости на 10 пунктов
-# Кушают взрослые максимум по 30 единиц еды, степень сытости растет на 1 пункт за 1 пункт еды.
-# Степень сытости не должна падать ниже 0, иначе чел умрет от голода.
-#
-# Деньги в тумбочку добавляет муж, после работы - 150 единиц за раз.
-# Еда стоит 10 денег 10 единиц еды. Шуба стоит 350 единиц.
-#
-# Грязь добавляется каждый день по 5 пунктов, за одну уборку жена может убирать до 100 единиц грязи.
-# Если в доме грязи больше 90 - у людей падает степень счастья каждый день на 10 пунктов,
-# Степень счастья растет: у мужа от игры в WoT (на 20), у жены от покупки шубы (на 60, но шуба дорогая)
-# Степень счастья не должна падать ниже 10, иначе чел умрает от депресии.
-#
-# Подвести итоги жизни за год: сколько было заработано денег, сколько сьедено еды, сколько куплено шуб.
+from random import randint, sample, shuffle
 
 CAT_NAMES = ['Майкл', 'Эдди', 'Роджер', 'Винсент', 'Дуглас', 'Леонард', 'Уолтер',
              'Джозеф', 'Джаспер', 'Эндрю', 'Ричард', 'Гарри', 'Джеймс', 'Генри', 'Фрэнк']
@@ -71,23 +33,15 @@ class Occupant:
             self.house.someone_is_dead()
         return self.is_dead
 
+    # нерациональным путем пытался определить тип еды по классу инстанса, залезая для этого в mro...
+    # в итоге убрал часть функциональности в холодильник дома
     def eat(self, max_food=30, fullness_mul=1):
-        # TODO: Напишите по-русски, что вы тут хотите сделать. Я почти уверен, что то, что вы хотите, можно сделать без ковыряния в служебных полях класса
-        for value in self.__class__.__mro__:
-            food = value.__name__
-            if food in list(self.house.food.keys()):  # TODO: list не нужен
-                break
-        meal = randint(max_food // 3, max_food)
-        if self.house.food[
-            food] >= meal:  # TODO: значение food остается от последней итерации цикла выше. Если вы так и хотели, то лучше это сделать явно.
-            # TODO: Ну и название переменной смыслу явно не соответствует.
-            self.family_print(f'ест', color='yellow')
-            self.fullness += meal * fullness_mul
-            self.house.food[food] -= meal
+        portion = randint(max_food // 3, max_food)
+        if self.house.use_fridge(portion, self):
+            self.fullness += portion * fullness_mul
+            self.family_print(text='поел', color='yellow')
             return True
         else:
-            insert = 'кошачьей ' if food == 'Cat' else ''
-            self.family_print(f'хочет есть, но в доме {insert}нет еды', color='red')
             return False
 
     def act(self):
@@ -103,7 +57,7 @@ class Occupant:
             cprint(f'{self.name} {text}', color=color)
 
 
-class Man(Occupant):
+class Human(Occupant):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -112,9 +66,15 @@ class Man(Occupant):
     def __str__(self):
         return f'Я - {super().__str__()}, уровень счастья - {self.happiness}'
 
+    def eat(self, max_food=30, fullness_mul=1):
+        if not super().eat(max_food, fullness_mul):
+            self.family_print(text=f'хочет есть, но в доме нет еды', color='red')
+            return False
+        return True
+
 
 # чтобы счастье менялось только у взрослых
-class Adult(Man):
+class Adult(Human):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -150,24 +110,24 @@ class House:
     def __init__(self, show=True):
         self.show = show
         self.money = 100
-        self.food = {'Man': 50,
-                     'Cat': 30}  # TODO: вообще, ключами можно сделать прямо классовые переменные (ну то есть без кавычек)
+        self.food = {Human: 50,
+                     Cat: 30}
         self.mess = 0
         self.occupants = []
         self.its_ok = True
         self.cats = 0
 
     def __str__(self):
-        return f'''В доме еды осталось - {self.food["Man"]}, кошачьей еды - {self.food["Cat"]},
+        return f'''В доме еды осталось - {self.food[Human]}, кошачьей еды - {self.food[Cat]},
 денег - {self.money}, уровень беспорядка - {self.mess}'''
 
-    def accept_occupant(self, occupant):
-        if isinstance(occupant, (Man,
-                                 Cat)):  # TODO: Кстати, если в isinstance передать базоввый класс этих двух, то программа отработает корректно
-            self.occupants.append(occupant)
-            if isinstance(occupant, Cat):
-                self.cats += 1
-            occupant.bind_to_house(self)
+    def accept_occupants(self, *occupants):
+        for occupant in occupants:
+            if isinstance(occupant, Occupant):
+                self.occupants.append(occupant)
+                if isinstance(occupant, Cat):
+                    self.cats += 1
+                occupant.bind_to_house(self)
 
     def someone_is_dead(self):
         self.its_ok = False
@@ -179,8 +139,8 @@ class House:
         self.money += amount
 
     def food_incident(self):
-        for key in self.food:
-            self.food[key] = 0
+        for food_type in self.food:
+            self.food[food_type] = 0
         if self.show:
             cprint('Из холодильника внезапно пропала вся еда', color='red')
 
@@ -188,6 +148,14 @@ class House:
         self.money = 0
         if self.show:
             cprint('Из дома внезапно пропали все деньги', color='red')
+
+    def use_fridge(self, portion, occupant):
+        for food_type in self.food:
+            if isinstance(occupant, food_type):
+                if self.food[food_type] >= portion:
+                    self.food[food_type] -= portion
+                    return True
+        return False
 
 
 # думаю вызвался бы инит Adult. Но на этот раз множественное наследование убрал, Adult наследуется от Human (ранее Man)
@@ -237,7 +205,7 @@ class Wife(Adult):
         if super().act():
             if self.happiness <= 35:
                 self.buy_fur_coat()
-            elif self.house.food['Man'] <= 30:
+            elif self.house.food[Human] <= 30:
                 self.shopping()
             elif self.house.mess > 100:
                 self.clean_house()
@@ -268,8 +236,8 @@ class Wife(Adult):
         if self.house.money >= food_price:
             self.family_print(f'сходила в магазин за едой', color='magenta')
             self.house.money -= food_price
-            self.house.food['Man'] += man_food_price
-            self.house.food['Cat'] += cat_food_price
+            self.house.food[Human] += man_food_price
+            self.house.food[Cat] += cat_food_price
             self.fullness -= 10
         else:
             self.out_of_money()
@@ -296,7 +264,7 @@ class Wife(Adult):
             self.eat()
 
 
-class Child(Man):
+class Child(Human):
 
     def act(self):
         if super().act():
@@ -330,7 +298,10 @@ class Cat(Occupant):
                 self.spoil()
 
     def eat(self, max_food=10, fullness_mul=2):
-        super().eat(max_food, fullness_mul)
+        if not super().eat(max_food, fullness_mul):
+            self.family_print(text=f'хочет есть, но в доме нет кошачьей еды', color='red')
+            return False
+        return True
 
     def sleep(self):
         self.fullness -= 10
@@ -374,12 +345,14 @@ class Simulation:
         serge.wedding(masha)
 
         # переезд
-        home.accept_occupant(serge)
-        home.accept_occupant(masha)
-        home.accept_occupant(kolya)
+        home.accept_occupants(serge, masha, kolya)
 
+        # чтобы не было котов с одинаковыми именами
+        names = CAT_NAMES.copy()
+        shuffle(names)
         for cat in range(cats):
-            home.accept_occupant(Cat(name=choice(CAT_NAMES), show=show))
+            home.accept_occupants(Cat(name=names.pop(), show=show))
+
         year = range(1, 366)
         incidents = {'food': sample(year, food_incidents), 'money': sample(year, money_incidents)}
 
@@ -414,9 +387,9 @@ for food_incidents in range(6):
             cprint(' максимально можно прокормить ', end='', color='magenta')
             cprint(life.experiment(salary=salary), color='yellow', end='')
             cprint(' котов', color='magenta')
-#
-# life = Simulation(1, 1)
-# life.cycle(show=True)
+
+life = Simulation(1, 1)
+life.cycle(show=True)
 ######################################################## Часть вторая
 #
 # После подтверждения учителем первой части надо
@@ -489,7 +462,7 @@ for food_incidents in range(6):
 #         pass
 
 
-# TODO после реализации второй части - отдать на проверку учителем две ветки
+
 
 
 ######################################################## Часть третья
