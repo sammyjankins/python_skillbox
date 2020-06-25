@@ -20,8 +20,50 @@
 #
 # Упорядочивание по частоте - по убыванию. Ширину таблицы подберите по своему вкусу
 # Требования к коду: он должен быть готовым к расширению функциональности. Делать сразу на классах.
+import zipfile
+from pprint import pprint
 
-# TODO здесь ваш код
+
+class CharStat:
+
+    def __init__(self, file_name):
+        self.file_name = file_name
+        self.stat = {}
+
+    def unzip(self):
+        zfile = zipfile.ZipFile(self.file_name, 'r')
+        for filename in zfile.namelist():
+            zfile.extract(filename)
+        self.file_name = filename
+
+    def calculate_stat(self):
+        if self.file_name.endswith('.zip'):
+            self.unzip()
+        with open(self.file_name, 'r', encoding='cp1251') as file:
+            for line in file:
+                self.scan_file_line(line)
+
+    def scan_file_line(self, line):
+        for char in line:
+            if char.isalpha():
+                if char in self.stat:
+                    self.stat[char] += 1
+                else:
+                    self.stat[char] = 1
+
+
+charstat = CharStat('python_snippets/voyna-i-mir.txt')
+charstat.calculate_stat()
+
+
+def sort_function(pair):
+    return pair[1]
+
+
+pprint(sorted(charstat.stat.items(), key=sort_function, reverse=True))
+pprint(sorted(charstat.stat.items()))
+pprint(sorted(charstat.stat.items(), reverse=True))
+
 
 # После выполнения первого этапа нужно сделать упорядочивание статистики
 #  - по частоте по возрастанию
