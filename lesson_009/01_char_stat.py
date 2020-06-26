@@ -51,19 +51,26 @@ class CharStat:
                 else:
                     self.stat[char] = 1
 
+    def print_stat(self):
+        pass
 
-charstat = CharStat('python_snippets/voyna-i-mir.txt')
-charstat.calculate_stat()
-
-
-def sort_function(pair):
-    return pair[1]
+    def sort_stat(self):
+        pass
 
 
-pprint(sorted(charstat.stat.items(), key=sort_function, reverse=True))
-pprint(sorted(charstat.stat.items()))
-pprint(sorted(charstat.stat.items(), reverse=True))
+class AlphaSortedStat(CharStat):
 
+    def __init__(self, reverse=True, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.reverse = reverse
+
+    def sort_function(self, pair):
+        return pair[1]
+
+
+# pprint(sorted(charstat.stat.items(), key=sort_function, reverse=True))
+# pprint(sorted(charstat.stat.items()))
+# pprint(sorted(charstat.stat.items(), reverse=True))
 
 # После выполнения первого этапа нужно сделать упорядочивание статистики
 #  - по частоте по возрастанию
@@ -72,3 +79,14 @@ pprint(sorted(charstat.stat.items(), reverse=True))
 # Для этого пригодится шаблон проектирование "Шаблонный метод"
 #   см https://goo.gl/Vz4828
 #   и пример https://gitlab.skillbox.ru/vadim_shandrinov/python_base_snippets/snippets/4
+
+if __name__ == '__main__':
+    need_alpha = input('Сортировать статистику по алфавиту? (да/нет) >>>') == 'да'
+    filename = 'python_snippets/voyna-i-mir.txt'
+    if need_alpha:
+        need_reverse = input('В порядке возрастания? (да/нет) >>>') == 'да'
+        char_stat = AlphaSortedStat(file_name=filename, reverse=need_reverse)
+    else:
+        char_stat = CharStat(file_name=filename)
+    char_stat.calculate_stat()
+    char_stat.print_stat()
