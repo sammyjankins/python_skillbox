@@ -21,7 +21,6 @@
 # Упорядочивание по частоте - по убыванию. Ширину таблицы подберите по своему вкусу
 # Требования к коду: он должен быть готовым к расширению функциональности. Делать сразу на классах.
 import zipfile
-from pprint import pprint
 
 
 class CharStat:
@@ -31,9 +30,9 @@ class CharStat:
         self.stat = {}
 
     def unzip(self):
-        zfile = zipfile.ZipFile(self.file_name, 'r')
-        for filename in zfile.namelist():
-            zfile.extract(filename)
+        z_file = zipfile.ZipFile(self.file_name, 'r')
+        for filename in z_file.namelist():
+            z_file.extract(filename)
         self.file_name = filename
 
     def calculate_stat(self):
@@ -52,10 +51,18 @@ class CharStat:
                     self.stat[char] = 1
 
     def print_stat(self):
-        pass
+        print('''+---------+----------+\n|  буква  | частота  |\n+---------+----------+''')
+        stat_sum = 0
+        for letter, count in self.sort_stat():
+            print(f'|{letter:^9}|{count:^10}|')
+            stat_sum += count
+        print(f'''+---------+----------+\n|  итого  |{stat_sum:^10}|\n+---------+----------+''')
+
+    def sort_function(self, pair):
+        return pair[1]
 
     def sort_stat(self):
-        pass
+        return sorted(self.stat.items(), key=self.sort_function, reverse=True)
 
 
 class AlphaSortedStat(CharStat):
@@ -64,9 +71,24 @@ class AlphaSortedStat(CharStat):
         super().__init__(*args, **kwargs)
         self.reverse = reverse
 
-    def sort_function(self, pair):
-        return pair[1]
+    def sort_stat(self):
+        return sorted(self.stat.items(), reverse=self.reverse)
 
+
+filename = 'python_snippets/voyna-i-mir.txt'
+
+
+# def sort_function(pair):
+#     return pair[1]
+
+
+# charstat = CharStat(file_name=filename)
+# charstat.calculate_stat()
+# charstat.print_stat()
+
+# stat = AlphaSortedStat(file_name=filename)
+# stat.calculate_stat()
+# stat.print_stat()
 
 # pprint(sorted(charstat.stat.items(), key=sort_function, reverse=True))
 # pprint(sorted(charstat.stat.items()))
@@ -80,12 +102,20 @@ class AlphaSortedStat(CharStat):
 #   см https://goo.gl/Vz4828
 #   и пример https://gitlab.skillbox.ru/vadim_shandrinov/python_base_snippets/snippets/4
 
+def check_user_input(text):
+    user_input = input(text)
+    while user_input not in ('да', 'нет'):
+        user_input = input('Необходимо ввести: да/нет >>> ')
+    return user_input == 'да'
+
+
 if __name__ == '__main__':
-    need_alpha = input('Сортировать статистику по алфавиту? (да/нет) >>>') == 'да'
-    filename = 'python_snippets/voyna-i-mir.txt'
-    if need_alpha:
-        need_reverse = input('В порядке возрастания? (да/нет) >>>') == 'да'
-        char_stat = AlphaSortedStat(file_name=filename, reverse=need_reverse)
+    need_alpha_sort = check_user_input('Сортировать статистику по алфавиту? (да/нет) >>> ')
+    # filename = 'python_snippets/voyna-i-mir.txt'
+    filename = 'python_snippets/voyna-i-mir.txt.zip'
+    if need_alpha_sort:
+        need_reverse = check_user_input('В порядке возрастания? (да/нет) >>> ')
+        char_stat = AlphaSortedStat(file_name=filename, reverse=not need_reverse)
     else:
         char_stat = CharStat(file_name=filename)
     char_stat.calculate_stat()
