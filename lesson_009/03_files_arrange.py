@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import os, time, shutil
+import os
+import shutil
+import time
+import zipfile
 
 # Нужно написать скрипт для упорядочивания фотографий (вообще любых файлов)
 # Скрипт должен разложить файлы из одной папки по годам и месяцам в другую.
@@ -33,8 +36,6 @@ import os, time, shutil
 #
 # Чтение документации/гугла по функциям - приветствуется. Как и поиск альтернативных вариантов :)
 # Требования к коду: он должен быть готовым к расширению функциональности. Делать сразу на классах.
-
-import zipfile
 from pprint import pprint
 
 
@@ -61,30 +62,48 @@ class FileArrange:
         cpy_dir = os.path.normpath(cpy_dir)
         if not os.path.exists(cpy_dir):
             os.makedirs(cpy_dir)
-        result_file_path = f'{cpy_dir}/{file}'
-        self.move_file_to_dir(result_file_path)
+        self.move_file_to_dir(cpy_dir, file)
 
-    def move_file_to_dir(self, result_file_path):
+    def move_file_to_dir(self, cpy_dir, file):
+        result_file_path = f'{cpy_dir}/{file}'
         shutil.copy2(self.full_file_path, result_file_path)
 
 
 class ZipArrange(FileArrange):
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.z_file = zipfile.ZipFile(self.source_name, 'r')
+
     def inspect_and_sort(self):
-        # для бробежки по архиву
-        # z_file = zipfile.ZipFile('icons.zip', 'r').infolist()
-        # for line in z_file:
-        #     # print(line.date_time)
-        pass
+        infolist = self.z_file.infolist()
+        for line in infolist:
+            self.full_file_path = line.filename
+            if '.png' in self.full_file_path:
+                file = line.filename.split('/')[-1]
+                file_m_date = line.date_time
+                self.dir_constructor(file,
+                                     file_m_date[0],
+                                     file_m_date[1],
+                                     file_m_date[2])
 
-    def move_file_to_dir(self, cpy_dir):
-        pass
+    def move_file_to_dir(self, cpy_dir, file):
+        source = self.z_file.open(self.full_file_path)
+        target = open(os.path.join(cpy_dir, file), "wb")
+        with source, target:
+            shutil.copyfileobj(source, target)
 
 
-path = 'icons'
+file_source = 'icons'
+zip_source = 'icons.zip'
+destination_path = 'icons_by_year'
+zip_destination_path = 'unzipped_icons_by_year'
 
-file_arrange = FileArrange(path, 'icons_by_year')
+file_arrange = FileArrange(file_source, destination_path)
 file_arrange.inspect_and_sort()
+zip_arrange = ZipArrange(zip_source, zip_destination_path)
+zip_arrange.inspect_and_sort()
+
 
 # Усложненное задание (делать по желанию)
 # Нужно обрабатывать zip-файл, содержащий фотографии, без предварительного извлечения файлов в папку.
