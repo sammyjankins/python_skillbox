@@ -78,6 +78,8 @@ class AlphaSortedStat(CharStat):
 filename = 'python_snippets/voyna-i-mir.txt'
 
 
+# зачет!
+
 # def sort_function(pair):
 #     return pair[1]
 

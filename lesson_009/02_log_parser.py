@@ -106,7 +106,7 @@ logparser_month = LogParserMonth('events.txt', 'out_month.txt')
 logparser_month.count_events()
 logparser_year = LogParserYear('events.txt', 'out_year.txt')
 logparser_year.count_events()
-
+# зачет! 
 # После выполнения первого этапа нужно сделать группировку событий
 #  - по часам
 #  - по месяцу
