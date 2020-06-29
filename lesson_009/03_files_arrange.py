@@ -59,12 +59,12 @@ class FileArrange:
     def dir_constructor(self, file, year, month, day):
         cpy_dir = f'{self.destination_name}/{str(year)}/{str(month)}/{str(day)}'
         cpy_dir = os.path.normpath(cpy_dir)
+        result_file_path = os.path.join(cpy_dir, file)
         if not os.path.exists(cpy_dir):
             os.makedirs(cpy_dir)
-        self.move_file_to_dir(cpy_dir, file)
+        self.move_file_to_dir(result_file_path)
 
-    def move_file_to_dir(self, cpy_dir, file):
-        result_file_path = f'{cpy_dir}/{file}'
+    def move_file_to_dir(self, result_file_path):
         shutil.copy2(self.full_file_path, result_file_path)
 
 
@@ -74,21 +74,23 @@ class ZipArrange(FileArrange):
         super().__init__(*args, **kwargs)
         self.z_file = zipfile.ZipFile(self.source_name, 'r')
 
+    # хоть и зачтено, но изменил метод,
+    # теперь будет работать для любых файлов, а не только .png
     def inspect_and_sort(self):
         infolist = self.z_file.infolist()
-        for line in infolist:
-            self.full_file_path = line.filename
-            if '.png' in self.full_file_path:
-                file = line.filename.split('/')[-1]
-                file_m_date = line.date_time
+        for value in infolist:
+            self.full_file_path = value.filename
+            if not value.is_dir():
+                file = value.filename.split('/')[-1]
+                file_m_date = value.date_time
                 self.dir_constructor(file,
                                      file_m_date[0],
                                      file_m_date[1],
                                      file_m_date[2])
 
-    def move_file_to_dir(self, cpy_dir, file):
+    def move_file_to_dir(self, result_file_path):
         source = self.z_file.open(self.full_file_path)
-        target = open(os.path.join(cpy_dir, file), "wb")
+        target = open(result_file_path, "wb")
         with source, target:
             shutil.copyfileobj(source, target)
 
