@@ -50,7 +50,7 @@ class DepressionError(Exception):
 
 class SuicideError(Exception):
     def __str__(self):
-        return 'Фил покончил с собой! Карме не оценила, чатично покинув Фила'
+        return 'Фил покончил с собой! Карма не оценила, частично покинув Фила'
 
 
 class KarmaOverflowError(Exception):
@@ -73,11 +73,19 @@ def check_karma_level(karma_level):
         raise KarmaOverflowError
 
 
+def log_update(day, karma_level, event):
+    with open('groundhog_log.txt', 'a', encoding='utf8') as log:
+        log.write(f'----------------------| '
+                  f'День: {day:>2}, карма: {karma_level: >2} |----------------------\n'
+                  f'Событие: {event}\n\n')
+
+
 # достижение просветления возможно только если количество очков кармы точно равно 777
 # при вереизбытке кармы, Фил сходит с ума и карма обнуляется
 if __name__ == '__main__':
     karma = 0
     days = 0
+    log_update(days, karma, 'Фил угодил во временную петлю!')
     while karma != ENLIGHTENMENT_CARMA_LEVEL:
         days += 1
         try:
@@ -85,10 +93,10 @@ if __name__ == '__main__':
             karma_overflow = karma > ENLIGHTENMENT_CARMA_LEVEL
             check_karma_level(karma_overflow)
         except KarmaOverflowError as exc:
-            print(exc)
             karma = 0
+            log_update(days, karma, str(exc))
         except Exception as exc:
-            print(exc)
             karma -= randint(karma // 20, karma // 10)
-        print(karma)
+            log_update(days, karma, str(exc))
+    log_update(days, karma, 'Фил достиг просветления!')
 # https://goo.gl/JnsDqu
