@@ -35,7 +35,10 @@ class LogParser:
             z_file.extract(filename)
         self.log_file_name = filename
 
+    # Подредактировал, хотя даже не знаю, может ли в реальных подобных ситуациях вообще понадобиться unzip
     def count_events(self):
+        if self.log_file_name.endswith('.zip'):
+            self.unzip()
         with open(self.log_file_name, mode='r', encoding='utf8') as log:
             for line in log:
                 line = line[:-1]
