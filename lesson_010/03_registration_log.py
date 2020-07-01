@@ -69,7 +69,7 @@ class LogScanner:
 
     def save_line_to_file(self, is_good_line=True):
         with open(self.out_good if is_good_line else self.out_bad, mode='a', encoding='utf8') as out_file:
-            result = f'\n{self.line}' + f' [Exception: {self.exception}]' * (not is_good_line)
+            result = f'\n|> {self.line:<40}' + f'<|> [Exception: {self.exception}]' * (not is_good_line)
             out_file.write(result)
 
 
