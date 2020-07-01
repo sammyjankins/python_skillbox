@@ -95,7 +95,9 @@ if __name__ == '__main__':
         except KarmaOverflowError as exc:
             karma = 0
             log_update(days, karma, str(exc))
-        except Exception as exc:
+        except Exception as exc:  # TODO: теперь попробуйте сделать так, чтобы ловились только те исключения, которые вы написали.
+                                  # TODO: Подсказка. Если у нас есть большой класс исключений, то им можно сделать базовый класс, и ловить только его.
+                                  # TODO: Тогда вместе с этим иключением будет отлавливаться всё, что от него унаследовано.
             karma -= randint(karma // 20, karma // 10)
             log_update(days, karma, str(exc))
     log_update(days, karma, 'Фил достиг просветления!')
