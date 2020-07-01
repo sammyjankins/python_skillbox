@@ -23,37 +23,41 @@ ENLIGHTENMENT_CARMA_LEVEL = 777
 
 
 # добавил возможность потерять карму при возникновении исключения
-class IamGodError(Exception):
+class BadKarmaException(Exception):
+    pass
+
+
+class IamGodError(BadKarmaException):
     def __str__(self):
         return 'Фил возомнил себя богом, карма частично его покинула'
 
 
-class DrunkError(Exception):
+class DrunkError(BadKarmaException):
     def __str__(self):
         return 'Фил напился как скотина, но наутро похмелья как не бывало!\nВпрочем, как и нескольких очков кармы...'
 
 
-class CarCrashError(Exception):
+class CarCrashError(BadKarmaException):
     def __str__(self):
         return 'Фил стал виновником ДТП, повредив несколько очков кармы'
 
 
-class GluttonyError(Exception):
+class GluttonyError(BadKarmaException):
     def __str__(self):
         return 'Фил так объелся, что из него выпало несколько очков кармы'
 
 
-class DepressionError(Exception):
+class DepressionError(BadKarmaException):
     def __str__(self):
         return 'Фил впал в депрессию, карма истощается на несколько очков'
 
 
-class SuicideError(Exception):
+class SuicideError(BadKarmaException):
     def __str__(self):
         return 'Фил покончил с собой! Карма не оценила, частично покинув Фила'
 
 
-class KarmaOverflowError(Exception):
+class KarmaOverflowError(BadKarmaException):
     def __str__(self):
         return 'Фил спятил от переизбытка мудрости, растеряв всю карму!'
 
@@ -95,9 +99,7 @@ if __name__ == '__main__':
         except KarmaOverflowError as exc:
             karma = 0
             log_update(days, karma, str(exc))
-        except Exception as exc:  # TODO: теперь попробуйте сделать так, чтобы ловились только те исключения, которые вы написали.
-                                  # TODO: Подсказка. Если у нас есть большой класс исключений, то им можно сделать базовый класс, и ловить только его.
-                                  # TODO: Тогда вместе с этим иключением будет отлавливаться всё, что от него унаследовано.
+        except BadKarmaException as exc:
             karma -= randint(karma // 20, karma // 10)
             log_update(days, karma, str(exc))
     log_update(days, karma, 'Фил достиг просветления!')
