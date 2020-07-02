@@ -104,3 +104,5 @@ if __name__ == '__main__':
             log_update(days, karma, str(exc))
     log_update(days, karma, 'Фил достиг просветления!')
 # https://goo.gl/JnsDqu
+
+# зачет! 

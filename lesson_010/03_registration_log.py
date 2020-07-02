@@ -96,4 +96,4 @@ file = 'registrations.txt'
 log_scanner = LogScanner(file, log_bad_file='registrations_bad.log', log_good_file='registrations_good.log')
 log_scanner.scan()
 
-# зачет! 
+# зачет!
