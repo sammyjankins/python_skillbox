@@ -7,20 +7,50 @@
 # Формат лога: <имя функции> <параметры вызова> <тип ошибки> <текст ошибки>
 # Лог файл открывать каждый раз при ошибке в режиме 'a'
 
+from functools import wraps
 
-def log_errors(func):
-    pass
-    # TODO здесь ваш код
+
+def log_errors(file_name):
+    def logging_wrapper(func):
+        @wraps(func)
+        def surrogate(*args, **kwargs):
+            divider = '------------------------------------------------------------------------\n'
+            try:
+                return func(*args, **kwargs)
+            except Exception as exc:
+                with open(file_name, mode='a', encoding='utf8') as log:
+                    err_type = exc.__class__.__name__
+                    # не определился как лучше, извлекать из скобок или записывать в исходном виде
+                    # args_line = f' с параметрами: {", ".join(map(str, args))}' if args else ''
+                    args_line = f' с параметрами: {args}' if args else ''
+                    if kwargs:
+                        kwargs_line = (f' с именованными параметрами: '
+                                       f'{", ".join([f"{key}={value}" for key, value in kwargs.items()])}')
+                    else:
+                        kwargs_line = ''
+                    log.write(f'Исполнение функии {func.__name__}{args_line}'
+                              f'{"," if args and kwargs else ""}{kwargs_line}\n'
+                              f'привело к ошибке типа {err_type} - {exc}\n{divider}')
+                raise exc
+
+        return surrogate
+
+    return logging_wrapper
 
 
 # Проверить работу на следующих функциях
-@log_errors
+@log_errors('function_errors.log')
 def perky(param):
+    """Делю на ноль, потому что могу!
+    Или не могу...
+    """
     return param / 0
 
 
-@log_errors
+@log_errors('function_errors.log')
 def check_line(line):
+    """Проверяю корректность данных регистрации
+    """
     name, email, age = line.split(' ')
     if not name.isalpha():
         raise ValueError("it's not a name")
@@ -45,11 +75,9 @@ for line in lines:
         print(f'Invalid format: {exc}')
 perky(param=42)
 
-
 # Усложненное задание (делать по желанию).
 # Написать декоратор с параметром - именем файла
 #
 # @log_errors('function_errors.log')
 # def func():
 #     pass
-
