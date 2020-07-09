@@ -16,23 +16,26 @@
 
 
 # Решение с помощью итератора
+from collections import defaultdict
+
+
 class LogParser:
 
     def __init__(self, log_file_name):
         self.log_file_name = log_file_name
         self.log_file = None
-        self.min_stat = None
-        self.next_minute = None
+        self.min_stat = defaultdict(int)
+        self.next_minute = defaultdict(int)
 
     def __iter__(self):
-        self.min_stat = None
-        self.next_minute = None
+        self.min_stat.clear()
+        self.next_minute.clear()
         self.log_file = open(self.log_file_name, mode='r', encoding='utf8')
         return self
 
     def __next__(self):
         if self.next_minute:
-            self.min_stat = self.next_minute
+            self.min_stat = self.next_minute.copy()
         for line in self.log_file:
             line = line[:-1]
             if self.check_line(line):
@@ -49,22 +52,17 @@ class LogParser:
     def check_line(self, line):
         if line.endswith('NOK'):
             minute = line.split('.')[0][1:-3]
-            if self.min_stat is not None:
-                if minute not in self.min_stat:
-                    self.next_minute = {minute: 1}
-                    return False
-                else:
-                    self.min_stat[minute] += 1
-                    return True
+            if self.min_stat and minute not in self.min_stat:
+                self.next_minute = {minute: 1}
+                return False
             else:
-                self.min_stat = {minute: 1}
-                return True
+                self.min_stat[minute] += 1
         return True
 
 
 # Решение с помощью генератора
 def grouped_events_gen(file_name):
-    min_stat = None
+    min_stat = defaultdict(int)
     with open(file_name, mode='r', encoding='utf8') as file:
         for line in file:
             line = line[:-1]
@@ -76,14 +74,9 @@ def grouped_events_gen(file_name):
 
 
 def check_line(min_stat, minute):
-    if min_stat:
-        if minute not in min_stat:
-            yield min_stat.popitem()
-            min_stat = {minute: 1}
-        else:
-            min_stat[minute] += 1
-    else:
-        min_stat = {minute: 1}
+    if min_stat and minute not in min_stat:
+        yield min_stat.popitem()
+    min_stat[minute] += 1
     return min_stat
 
 
