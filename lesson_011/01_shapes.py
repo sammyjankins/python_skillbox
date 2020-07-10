@@ -24,7 +24,7 @@ def get_polygon(n):
                            sides=sides - 1,
                            angle_step=angle_step,
                            angle=angle + angle_step,
-                           length=length)
+                           length=length)  # TODO: используйте тут цикл вместо рекурсии.
 
     def shapes(point, angle=0, length=200):
         angle_step = 360 / n

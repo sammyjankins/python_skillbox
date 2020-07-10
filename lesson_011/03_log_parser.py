@@ -92,3 +92,5 @@ for group_time, event_count in grouped_events:
 # Генераторами получилось лаконичнее.
 # И внезапно, с помощью фичи пайчарма "extract method", узнал про такую возможность,
 # как "yield from"
+
+# зачет!

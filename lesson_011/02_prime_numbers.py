@@ -27,7 +27,7 @@ class PrimeNumbers:
         self.number, self.n, self.primes = 2, n, []
 
     def __iter__(self):
-        self.number, self.primes = 2, []
+        self.number, self.primes = 2, []  # TODO: это уже сделано в ините, можно не дублировать.
         return self
 
     def __next__(self):
@@ -50,6 +50,8 @@ class PrimeNumbers:
 prime_number_iterator = PrimeNumbers(n=10000)
 for number in prime_number_iterator:
     print(number)
+
+# TODO: можно делать дальше
 
 # TODO после подтверждения части 1 преподователем, можно делать
 # Часть 2
