@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from functools import reduce
 
+
 # Есть функция генерации списка простых чисел
 
 
@@ -27,10 +28,13 @@ class PrimeNumbers:
         self.number, self.n, self.primes = 2, n, []
 
     def __iter__(self):
-        # self.number, self.primes = 2, []  # TODO: это уже сделано в ините, можно не дублировать.
-        # TODO: да, но ведь если эту строчку удалить и пройти по объекту циклом,
-        #  после прохода другим циклом по тому же объекту - параметры не обнулятся.
-        #  Разве не следует обнулить? Или обнулить хотя бы self.number..
+        # self.number, self.primes = 2, []
+        # это уже сделано в ините, можно не дублировать.
+        # да, но ведь если эту строчку удалить и пройти по объекту циклом,
+        # после прохода другим циклом по тому же объекту - параметры не обнулятся.
+        # Разве не следует обнулить? Или обнулить хотя бы self.number..
+        # TODO Рассуждения верные, но итераторы по своей сущности - одноразовые
+        # TODO Если бы не это - вы были бы правы)
         return self
 
     def __next__(self):
@@ -51,20 +55,22 @@ class PrimeNumbers:
 
 
 prime_number_iterator = PrimeNumbers(n=10000)
-# TODO: если это раскомментировать, то видно что параметры prime_number_iterator
-#  в следующем цикле не обнуляются
+
+
+# если это раскомментировать, то видно что параметры prime_number_iterator
+# в следующем цикле не обнуляются
 # for num in prime_number_iterator:
 #     if num == 251:
 #         print('==================== РАЗРЫВ! ====================!\n')
 #         break
 #     print(num)
 
-for num in prime_number_iterator:
-    print(num)
+# for num in prime_number_iterator:
+#     print(num)
 
-# TODO: можно делать дальше
+# можно делать дальше
 
-# TODO после подтверждения части 1 преподователем, можно делать
+# после подтверждения части 1 преподователем, можно делать
 # Часть 2
 # Теперь нужно создать генератор, который выдает последовательность простых чисел до n
 # Распечатать все простые числа до 10000 в столбик
@@ -83,6 +89,10 @@ def prime_numbers_generator(n, filter_type=None):
                 yield number
 
 
+for number_g, number_i in zip(prime_numbers_generator(n=10000), prime_number_iterator):
+    print(number_g == number_i)
+
+
 def is_lucky(number):
     number = str(number)
     len_step = len(number) // 2
@@ -91,7 +101,8 @@ def is_lucky(number):
 
 def is_palindromic(number):
     number = str(number)
-    len_step = len(number) // 2
+    len_step = len(number) // 2  # TODO тут кстати можно опустить разделение строки на две части
+    # TODO и просто сравнить будет ли равна строка себе же в обратном порядке
     return number[:len_step] == number[-len_step:][::-1]
 
 

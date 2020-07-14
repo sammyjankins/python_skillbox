@@ -31,3 +31,4 @@ for draw_shape in [get_polygon(n) for n in range(1, 8)]:
     draw_shape(point=sd.random_point(), angle=42, length=100)
 
 sd.pause()
+#зачёт!
