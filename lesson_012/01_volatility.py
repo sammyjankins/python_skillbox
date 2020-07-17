@@ -73,7 +73,7 @@
 #     def run(self):
 #         <обработка данных>
 
-from utils import time_track
+from utils import time_track, VolDataProcessor
 import os
 
 
@@ -110,36 +110,8 @@ def main():
         for vol in vols:
             vol.run()
 
-        # формируем списки для принта:
-        # TODO Обработку данных хорошо было бы вынести в отдельную функцию (её можно даже в отдельный модуль кинуть
-        # TODO чтобы потом использовать во 2 и 3 частях)
-        vols.sort(key=lambda obj: obj.volatility)
-        zero_vols = []
-        while True:
-            if vols[0].volatility == 0:
-                zero_vols.append(vols.pop(0).ticker)
-            else:
-                break
-        max_vols = [vols.pop() for _ in range(3)]
-        min_vols = [vols.pop(0) for _ in range(3)]
-
-        # принтуем отформатированные списки:
-        print('Максимальная волатильность: ')
-        print('+----------+--------------+\n|  TICKER  |      VOL     |\n+----------+--------------+')
-
-        for value in max_vols:
-            print(f'|{value.ticker:^9} - {value.volatility:^10.2f} % |')
-        print('+----------+--------------+\n')
-
-        print('Минимальная волатильность: ')
-        print('+----------+--------------+\n|  TICKER  |      VOL     |\n+----------+--------------+')
-        for value in min_vols[::-1]:
-            print(f'|{value.ticker:^9} - {value.volatility:^10.2f} % |')
-        print('+----------+--------------+\n')
-
-        print('Нулевая волатильность: ')
-        print(', '.join([value for value in zero_vols]))
-        print()
+        vol_analysis = VolDataProcessor(vols)
+        print(vol_analysis)
 
 
 if __name__ == '__main__':
