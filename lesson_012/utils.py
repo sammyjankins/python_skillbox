@@ -17,11 +17,11 @@ def time_track(func):
 
 class VolDataProcessor:
 
-    def __init__(self, vols_list, max_tickers=3, min_tickers=3):
+    def __init__(self, vols_container, max_tickers=3, min_tickers=3):
         self.max = []
         self.min = []
         self.zero = []
-        self.vols_list = vols_list
+        self.vols_container = vols_container
         self.process(max_tickers, min_tickers)
 
     # что-то мне подсказывает, что такое использование специального метода
@@ -34,19 +34,19 @@ class VolDataProcessor:
 
     def construct_zero(self):
         while True:
-            if self.vols_list[0].volatility == 0:
-                self.zero.append(self.vols_list.pop(0).ticker)
+            if self.vols_container[0].volatility == 0:
+                self.zero.append(self.vols_container.pop(0).ticker)
             else:
                 break
 
     def construct_max(self, max_tickers):
-        self.max = [self.vols_list.pop() for _ in range(max_tickers)]
+        self.max = [self.vols_container.pop() for _ in range(max_tickers)]
 
     def construct_min(self, min_tickers):
-        self.min = [self.vols_list.pop(0) for _ in range(min_tickers)]
+        self.min = [self.vols_container.pop(0) for _ in range(min_tickers)]
 
     def process(self, max_tickers, min_tickers):
-        self.vols_list.sort(key=lambda obj: obj.volatility)
+        self.vols_container.sort(key=lambda obj: obj.volatility)
         self.construct_zero()
         self.construct_max(max_tickers)
         self.construct_min(min_tickers)
@@ -69,3 +69,21 @@ class VolDataProcessor:
     def print_zero(self):
         print('Нулевая волатильность: ')
         print(', '.join([value for value in self.zero]))
+
+
+class VolQueueProcessor(VolDataProcessor):
+
+    def process(self, max_tickers, min_tickers):
+        # это вообще законно?
+        class Vol:
+
+            def __init__(self, ticker, volatility):
+                self.ticker = ticker
+                self.volatility = volatility
+
+        vols_list = []
+        while not self.vols_container.empty():
+            vol = Vol(**self.vols_container.get())
+            vols_list.append(vol)
+        self.vols_container = vols_list
+        super().process(max_tickers, min_tickers)
