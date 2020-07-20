@@ -30,8 +30,7 @@ class VolCalc(threading.Thread):
         self.vol = 0
         self.max_cost = 0
         self.min_cost = 0
-        self.volatility = 0
-        self.ticker = ''
+        self.data = {}
 
     def half_sum(self):
         return (self.max_cost + self.min_cost) / 2
@@ -40,12 +39,13 @@ class VolCalc(threading.Thread):
         return ((self.max_cost - self.min_cost) / self.half_sum()) * 100
 
     def run(self):
-        self.ticker = self.file_name.split('_')[1][:-4]
+        ticker = self.file_name.split('_')[1][:-4]
         with open(file=self.file_name, mode='r', encoding='utf8') as file:
             transaction_prices = [float(line.split(',')[2]) for line in file if 'SECID' not in line]
             transaction_prices.sort()
             self.min_cost, self.max_cost = transaction_prices[0], transaction_prices[-1]
-            self.volatility = self.evaluate_vol()
+            volatility = self.evaluate_vol()
+            self.data.update({'ticker': ticker, 'volatility': volatility})
 
 
 @time_track
@@ -58,10 +58,12 @@ def main():
         for vol in vols:
             vol.join()
 
-        vol_analysis = VolDataProcessor(vols)
-        print(vol_analysis)
+    vol_dicts = [vol.data for vol in vols]
+    vol_analysis = VolDataProcessor(vol_dicts)
+    vol_analysis.process()
+    print(vol_analysis)
 
 
 if __name__ == '__main__':
     main()
-#зачёт!
+# зачёт!

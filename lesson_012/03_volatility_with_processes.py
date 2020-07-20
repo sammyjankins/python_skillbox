@@ -62,8 +62,9 @@ def main():
         for vol in vols:
             vol.join()
 
-        vol_analysis = VolQueueProcessor(collector)
-        print(vol_analysis)
+    vol_analysis = VolQueueProcessor(collector)
+    vol_analysis.process()
+    print(vol_analysis)
 
 
 if __name__ == '__main__':
