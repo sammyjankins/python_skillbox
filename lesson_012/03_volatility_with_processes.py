@@ -20,7 +20,7 @@
 import multiprocessing
 import os
 
-from utils import time_track, VolQueueProcessor
+from utils import time_track, VolDataProcessor
 
 
 class VolCalc(multiprocessing.Process):
@@ -51,22 +51,63 @@ class VolCalc(multiprocessing.Process):
         self.collector.put({'ticker': self.ticker, 'volatility': self.volatility})
 
 
-@time_track
-def main():
-    collector = multiprocessing.Queue()
-    directory_to_scan = 'trades'
-    for dirpath, dirnames, filenames in os.walk(directory_to_scan):
-        vols = [VolCalc(os.path.join(directory_to_scan, file), collector) for file in filenames]
-        for vol in vols:
-            vol.start()
-        for vol in vols:
-            vol.join()
+class VolCalcP:
 
-    vol_analysis = VolQueueProcessor(collector)
+    def __init__(self, file_name):
+        self.file_name = file_name
+        self.vol = 0
+        self.max_cost = 0
+        self.min_cost = 0
+        # self.data = {}
+
+    def half_sum(self):
+        return (self.max_cost + self.min_cost) / 2
+
+    def evaluate_vol(self):
+        return ((self.max_cost - self.min_cost) / self.half_sum()) * 100
+
+    def run(self):
+        ticker = self.file_name.split('_')[1][:-4]
+        with open(file=self.file_name, mode='r', encoding='utf8') as file:
+            transaction_prices = [float(line.split(',')[2]) for line in file if 'SECID' not in line]
+            transaction_prices.sort()
+            self.min_cost, self.max_cost = transaction_prices[0], transaction_prices[-1]
+            volatility = self.evaluate_vol()
+            return {'ticker': ticker, 'volatility': volatility}
+
+
+@time_track
+def launch(processes=3):
+    print('============================================')
+    print(f'Процессов пула: {processes}')
+    pool = multiprocessing.Pool(processes=processes)
+    directory_to_scan = 'trades'
+    collector = []
+    for dirpath, dirnames, filenames in os.walk(directory_to_scan):
+        vols = [VolCalcP(os.path.join(directory_to_scan, file)) for file in filenames]
+        collector = pool.map(VolCalcP.run, vols)
+    vol_analysis = VolDataProcessor(collector)
     vol_analysis.process()
-    print(vol_analysis)
+    # print(vol_analysis)
+
+
+def main():
+    tests = {str(amount): launch(amount)[1] for amount in range(1, 17)}
+    print('\nПолный список тестов:')
+    print('+-------------+----------+\n|  PROCESSES  |   TIME   |\n+-------------+----------+')
+    for count, time in tests.items():
+        print(f'|{count:^12} - {time:^9.2f}|')
+    print('+-------------+----------+\n')
+
+    fast = min(tests, key=lambda x: tests[x])
+
+    print(f'Самый быстрый результат:\n'
+          f'    Процессов: {fast}\n'
+          f'    Время исполнения: {tests[fast]}\n')
+    if int(fast) == multiprocessing.cpu_count():
+        print('Во время тестирование самые быстрые результаты были получены \n'
+              'при количестве процессов, равном количеству ядер процессора.')
 
 
 if __name__ == '__main__':
     main()
-#зачёт!

@@ -10,7 +10,7 @@ def time_track(func):
         ended_at = time.time()
         elapsed = round(ended_at - started_at, 4)
         print(f'Функция работала {elapsed} секунд(ы)')
-        return result
+        return result, elapsed
 
     return surrogate
 
@@ -58,13 +58,3 @@ class VolDataProcessor:
 
         print('Нулевая волатильность: ')
         print(', '.join(self.zero))
-
-
-class VolQueueProcessor(VolDataProcessor):
-
-    def process(self, values_to_show=3):
-        vols_list = []
-        while not self.vols_container.empty():
-            vols_list.append(self.vols_container.get())
-        self.vols_container = vols_list
-        super().process(values_to_show)
