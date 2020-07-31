@@ -76,11 +76,19 @@ class VolCalcP:
             return {'ticker': ticker, 'volatility': volatility}
 
 
-@time_track
-def launch(processes=3):
-    print('============================================')
-    print(f'Процессов пула: {processes}')
+def launch(processes=3, times=100):
+    # print('============================================')
+    # print(f'Процессов пула: {processes}')
     pool = multiprocessing.Pool(processes=processes)
+    speed_array = []
+    for _ in range(times):
+        speed_array.append(restarter(pool)[1])
+    average = sum(speed_array) / len(speed_array)
+    return min(speed_array), max(speed_array), average
+
+
+@time_track
+def restarter(pool):
     directory_to_scan = 'trades'
     collector = []
     for dirpath, dirnames, filenames in os.walk(directory_to_scan):
@@ -92,22 +100,26 @@ def launch(processes=3):
 
 
 def main():
-    tests = {str(amount): launch(amount)[1] for amount in range(1, 17)}
+    tests = {str(amount): launch(amount) for amount in range(1, 15)}
     print('\nПолный список тестов:')
-    print('+-------------+----------+\n|  PROCESSES  |   TIME   |\n+-------------+----------+')
+    print('+-------------+--------------+--------------+\n'
+          '|  PROCESSES  |   MIN TIME   |   MAX TIME   |\n'
+          '+-------------+--------------+--------------+')
     for count, time in tests.items():
-        print(f'|{count:^12} - {time:^9.2f}|')
-    print('+-------------+----------+\n')
+        print(f'|{count:^12} - {time[0]:^12.2f} - {time[1]:^13.2f}|')
+    print('+-------------+--------------+--------------+\n')
 
-    fast = min(tests, key=lambda x: tests[x])
-
+    fast = min(tests, key=lambda x: tests[x][0])
     print(f'Самый быстрый результат:\n'
           f'    Процессов: {fast}\n'
-          f'    Время исполнения: {tests[fast]}\n')
+          f'    Среднее время исполнения: {tests[fast][2]}\n')
     if int(fast) == multiprocessing.cpu_count():
-        print('Во время тестирование самые быстрые результаты были получены \n'
+        print('Во время тестирования самые быстрые результаты были получены \n'
               'при количестве процессов, равном количеству ядер процессора.')
 
 
 if __name__ == '__main__':
     main()
+
+# Провел тесты дважды, и как ни странно, оба раза наибольшую эффективность проявили 9 процессов
+# Скриншот: http://joxi.ru/J2bgg6QSG8bq3A
