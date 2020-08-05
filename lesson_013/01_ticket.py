@@ -3,6 +3,7 @@ import argparse
 from os import path, makedirs
 
 from PIL import Image, ImageDraw, ImageFont
+from fallout_ticket import make_fallout_ticket
 
 
 # Заполнить все поля в билете на самолет.
@@ -29,7 +30,8 @@ def make_ticket(fio, from_, to, date):
 # make_ticket('Dan B Cooper', 'Portland', 'Seattle', '24.11.1971')
 
 def valid_name(line):
-    return line.replace(' ', '').isalpha()
+    line = ''.join(line)
+    return line.isalpha()
 
 
 def valid_date(line):
@@ -55,7 +57,11 @@ def check_args(args):
 
 def process_cmd(args):
     if check_args(args):
-        im = make_ticket(args.fio, args.from_, args.to, args.date)
+        fio, from_, to = [' '.join(line) for line in (args.fio, args.from_, args.to)]
+        if args.fallout:
+            im = make_fallout_ticket(fio, from_, to, args.date)
+        else:
+            im = make_ticket(fio, from_, to, args.date)
         if args.save_to is not None:
             try:
                 makedirs(args.save_to, exist_ok=True)
@@ -67,11 +73,12 @@ def process_cmd(args):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--fio', action='store', dest='fio', required=True, help='Last name')
-    parser.add_argument('--from', action='store', dest='from_', required=True, help='From where')
-    parser.add_argument('--to', action='store', dest='to', required=True, help='To where')
+    parser.add_argument('--fio', action='store', dest='fio', nargs='+', required=True, help='Last name')
+    parser.add_argument('--from', action='store', dest='from_', nargs='+', required=True, help='From where')
+    parser.add_argument('--to', action='store', dest='to', nargs='+', required=True, help='To where')
     parser.add_argument('--date', action='store', dest='date', required=True, help='Example: 24.11.2004')
     parser.add_argument('--save_to', action='store', dest='save_to', required=False, help='Path to save the image')
+    parser.add_argument('--fallout', action='store_true', required=False, help='Make fallout ticket')
     args = parser.parse_args()
     process_cmd(args)
 
@@ -88,3 +95,11 @@ if __name__ == '__main__':
 #   --date - обязательный, когда летим.
 #   --save_to - необязательный, путь для сохранения заполненнего билета.
 # и заполнять билет.
+
+
+# варианты консольного запуска:
+# python 01_ticket.py --fio Dan B Cooper --from Portland --to Seattle --date 24.11.1971
+# python 01_ticket.py --fio Dan B Cooper --from Portland --to Seattle --date 24.11.1971 --save_to tickets/skillbox
+# python 01_ticket.py --fio Alex Murphy --from Detroit --to Los Angeles --date 17.07.1987 --fallout
+# python 01_ticket.py --fio Alex Murphy --from Detroit --to Los Angeles --date 17.07.1987 --fallout --save_to
+# tickets/fallout
