@@ -55,11 +55,11 @@ def make_fallout_ticket(fio, from_, to, date):
     color_hex = f'#{"".join([hex(x)[2:] for x in color])}'
     bg_color_hex = '#0f350c'
 
-    im = Image.open('python_snippets/fallout-3preview.jpg')
+    im = Image.open('fallout-3preview.jpg')
     qr_source = 'https://tinyurl.com/2fcpre6'
 
     draw = ImageDraw.Draw(im)
-    f_path = os.path.normpath('python_snippets/Overseer.ttf')
+    f_path = os.path.normpath('Overseer.ttf')
 
     make_fields(f_path, draw, color)
     draw_frame(draw, color)
