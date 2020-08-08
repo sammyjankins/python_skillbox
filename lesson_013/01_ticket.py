@@ -196,3 +196,4 @@ if __name__ == '__main__':
 # python 01_ticket.py --fio Alex Murphy --from Detroit --to Los Angeles --date 17.07.1987 --fallout
 # python 01_ticket.py --fio Alex Murphy --from Detroit --to Los Angeles --date 17.07.1987 --fallout --save_to
 # tickets/fallout
+# зачет! 
