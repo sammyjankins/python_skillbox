@@ -1,0 +1,6 @@
+colorama==0.4.3
+Pillow==7.2.0
+pygame==2.0.0.dev8
+qrcode==6.1
+simple-draw==2.6.8
+six==1.15.0
