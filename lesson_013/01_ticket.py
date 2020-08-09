@@ -142,8 +142,8 @@ class FalloutTicket(Ticket):
     def make_ticket(self):
         self.im = Image.open(self.template)
         self.draw = ImageDraw.Draw(self.im)
-        self._arrange_template()
         self.base_font = ImageFont.truetype(self.font_path, 24)
+        self._arrange_template()
         self.draw.text((55, 105), self.fio, font=self.base_font, fill=self.color)
         self.draw.text((260, 105), self.date, font=self.base_font, fill=self.color)
 
