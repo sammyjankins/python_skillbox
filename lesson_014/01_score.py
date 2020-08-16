@@ -32,8 +32,82 @@
 # Скрипт должен принимать параметр --result и печатать на консоль:
 #   Количество очков для результатов ХХХ - УУУ.
 
-# TODO тут ваш код
 
 # При написании кода помнить, что заказчик может захотеть доработок и новых возможностей...
 # И, возможно, вам пригодится паттерн проектирования "Состояние",
 #   см https://clck.ru/Fudd8 и https://refactoring.guru/ru/design-patterns/state
+
+
+class Frame(object):
+    valid_symbols = '123456789-/X'
+
+    def __init__(self, frame_line):
+        self.frame_line = frame_line
+        self.points = 0
+
+    def __str__(self):
+        return self.frame_line
+
+    def eval_frame(self):
+        self.validate_frame()
+        if self.frame_line.endswith('/'):
+            self.points += 15
+        elif '-' in self.frame_line:
+            self.points += int(self.frame_line.replace('-', ''))
+        elif self.frame_line.isdigit():
+            points = sum((int(x) for x in self.frame_line))
+            if points <= 9:
+                self.points += points
+            else:
+                raise Exception(f'{points} - incorrect frame score')
+        # print(self.points)
+
+    def validate_frame(self):
+        # Проверка фрейма на валидность символов
+        validity = {x: x in self.valid_symbols for x in self.frame_line}
+        if not all(validity.values()):
+            raise BadFrameError(
+                f'Invalid characters in frame: {", ".join([char for char in validity if not validity[char]])}')
+        if self.frame_line.startswith('/'):
+            raise BadFrameError('A frame cannot start with "/"')
+
+
+class Game(object):
+
+    def __init__(self, game_result):
+        self.score = 0
+        self.frames_amount = 0
+        self.pairs = []
+        self.game_result = game_result
+
+    def get_score(self):
+        self.frames_amount += self.game_result.count('X')
+        self.score += 20 * self.frames_amount
+        self.eval_pairs()
+        self.frames_amount += len(self.pairs)
+        frames = (Frame(frame_line) for frame_line in self.pairs)
+        for frame in frames:
+            frame.eval_frame()
+            self.score += frame.points
+        print(f'Результаты игры {self.game_result} ::: {self.score} очков!')
+
+    def eval_pairs(self):
+        for value in self.game_result.split('X'):
+            if len(value) % 2:
+                raise Exception('Incorrect frame sequence')
+            v_pairs = [value[i: i + 2] for i in range(0, len(value) - 1, 2)]
+            self.pairs.extend(v_pairs)
+
+
+class BadFrameError(Exception):
+    pass
+
+
+result1 = 'X4/34-4'
+result2 = 'X4/34-4X2-1/X'
+
+game = Game(result1)
+game.get_score()
+
+game1 = Game(result2)
+game1.get_score()
