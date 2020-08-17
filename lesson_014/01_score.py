@@ -50,7 +50,9 @@ class Frame(object):
 
     def eval_frame(self):
         self.validate_frame()
-        if self.frame_line.endswith('/'):
+        if self.frame_line.startswith('X'):
+            self.points += 20
+        elif self.frame_line.endswith('/'):
             self.points += 15
         elif '-' in self.frame_line:
             self.points += int(self.frame_line.replace('-', ''))
@@ -60,7 +62,6 @@ class Frame(object):
                 self.points += points
             else:
                 raise Exception(f'{points} - incorrect frame score')
-        # print(self.points)
 
     def validate_frame(self):
         # Проверка фрейма на валидность символов
@@ -81,22 +82,23 @@ class Game(object):
         self.game_result = game_result
 
     def get_score(self):
-        self.frames_amount += self.game_result.count('X')
-        self.score += 20 * self.frames_amount
+        self.game_result = self.game_result.replace('X', 'X-')
+        if len(self.game_result) % 2:
+            raise Exception('Incorrect frame sequence')
         self.eval_pairs()
         self.frames_amount += len(self.pairs)
         frames = (Frame(frame_line) for frame_line in self.pairs)
         for frame in frames:
             frame.eval_frame()
             self.score += frame.points
-        print(f'Результаты игры {self.game_result} ::: {self.score} очков!')
+        if self.frames_amount < 10:
+            ending = "ов" if self.frames_amount in (1, 2, 3, 4, 5) else "а"
+            print(f'Осталось сыграть еще {10 - self.frames_amount} фрейм{ending if self.frames_amount != 9 else ""}')
+        print(f'Результаты игры {self.game_result} ::: {self.score} очков!\n')
 
     def eval_pairs(self):
-        for value in self.game_result.split('X'):
-            if len(value) % 2:
-                raise Exception('Incorrect frame sequence')
-            v_pairs = [value[i: i + 2] for i in range(0, len(value) - 1, 2)]
-            self.pairs.extend(v_pairs)
+        v_pairs = [self.game_result[i: i + 2] for i in range(0, len(self.game_result) - 1, 2)]
+        self.pairs.extend(v_pairs)
 
 
 class BadFrameError(Exception):
