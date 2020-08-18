@@ -43,10 +43,11 @@ class Game(object):
         self.frames_amount = 0
         self.pairs = []
         self.game_result = game_result
+        self._game_result = ''
 
     def get_score(self):
-        self.game_result = self.game_result.replace('X', 'X-')
-        if len(self.game_result) % 2:
+        self._game_result = self.game_result.replace('X', 'X-')
+        if len(self._game_result) % 2:
             raise Exception('Incorrect frame sequence')
         self.eval_pairs()
         frames = (Frame(frame_line) for frame_line in self.pairs)
@@ -56,7 +57,7 @@ class Game(object):
         print(f'Game result: {self.game_result} ::: {self.score} points!\n')
 
     def eval_pairs(self):
-        v_pairs = [self.game_result[i: i + 2] for i in range(0, len(self.game_result) - 1, 2)]
+        v_pairs = [self._game_result[i: i + 2] for i in range(0, len(self._game_result) - 1, 2)]
         self.pairs.extend(v_pairs)
         self.frames_amount += len(self.pairs)
         if self.frames_amount > 10:
@@ -67,3 +68,17 @@ class Game(object):
 
 class BadFrameError(Exception):
     pass
+
+
+if __name__ == '__main__':
+    game1 = Game('X4/34-4X2-1/XX4/')
+    game2 = Game('X4/34-4X2-1/X')
+    game3 = Game('X--X--X--X----X')
+    game4 = Game('X---/X---/X-/X')
+    game5 = Game('X')
+
+    game1.get_score()
+    game2.get_score()
+    game3.get_score()
+    game4.get_score()
+    game5.get_score()

@@ -38,20 +38,4 @@
 #   см https://clck.ru/Fudd8 и https://refactoring.guru/ru/design-patterns/state
 
 from lesson_014.bowling import Game
-
-result1 = 'X4/34-4'
-result2 = 'X4/34-4X2-1/X'
-# result3 = 'X4/34-4X2-1/XX4/34-4'
-result4 = 'X4/34-4X2-1/XX'
-
-game1 = Game(result1)
-game1.get_score()
-
-game2 = Game(result2)
-game2.get_score()
-
-# game3 = Game(result3)
-# game3.get_score()
-
-game4 = Game(result4)
-game4.get_score()
+import argparse
