@@ -37,5 +37,18 @@
 # И, возможно, вам пригодится паттерн проектирования "Состояние",
 #   см https://clck.ru/Fudd8 и https://refactoring.guru/ru/design-patterns/state
 
-from lesson_014.bowling import Game
+from bowling import Game
 import argparse
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--result', action='store', dest='result', required=True,
+                        help='A string of values representing the result of the game')
+    args = parser.parse_args()
+    game = Game(args.result)
+    game.get_score()
+
+
+if __name__ == '__main__':
+    main()

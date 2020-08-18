@@ -61,9 +61,12 @@ class Game(object):
         self.pairs.extend(v_pairs)
         self.frames_amount += len(self.pairs)
         if self.frames_amount > 10:
-            raise Exception('Incorrect number of frames in line')
+            raise Exception("Incorrect number of frames in line: you can't play more than 10 frames!")
+        played = f'{self.frames_amount} frame{"s" if self.frames_amount > 1 else ""} played'
+        left = ''
         if self.frames_amount < 10:
-            print(f'{10 - self.frames_amount} frame{"s" if self.frames_amount < 9 else ""} left!')
+            left = f', {10 - self.frames_amount} frame{"s" if self.frames_amount < 9 else ""} left!'
+        print(played, left)
 
 
 class BadFrameError(Exception):
