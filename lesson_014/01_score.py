@@ -37,18 +37,49 @@
 # И, возможно, вам пригодится паттерн проектирования "Состояние",
 #   см https://clck.ru/Fudd8 и https://refactoring.guru/ru/design-patterns/state
 
-from bowling import Game
 import argparse
+import logging
+
+from bowling import Game
+
+FORMAT = '[%(asctime)-15s] %(message)s'
 
 
 def main():
+    logging.basicConfig(
+        format=FORMAT,
+        level=logging.INFO,
+        handlers=[logging.FileHandler('log_bowling.log', 'a', 'utf-8')],
+    )
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--result', action='store', dest='result', required=True,
-                        help='A string of values representing the result of the game')
+                        help='A string of values representing the result of the game. '
+                             'If result starts with -- then wrap it in single quotes like \'--X42_2X...\'')
     args = parser.parse_args()
-    game = Game(args.result)
-    game.get_score()
+    arg = args.result.replace("'", '') if args.result.startswith("'") else args.result
+    game = Game(arg)
+    try:
+        game.get_score()
+    except Exception as exc:
+        print(exc)
+        logging.exception(f'For game result: {arg} -> {exc}')
 
 
 if __name__ == '__main__':
     main()
+
+# Следует обратить внимание на передачу значений, начинающихся с символов "-".
+# Чтобы скрипт принял значение, нужно передать его в одинарных ковычках.
+# Примеры команд для консольного запуска:
+# python 01_score.py --result X4/34-4X2-1/XX4/
+# python 01_score.py --result X4/34-4X2-1/X
+# python 01_score.py --result X--X--X--X----X
+# python 01_score.py --result X
+# python 01_score.py --result '--'
+# python 01_score.py --result 123456789/X--
+# python 01_score.py --result X4/34-4X2-1/XX4/34-4
+# python 01_score.py --result X4934-4X2-1/XX
+# python 01_score.py --result 1X4/34-4X2-1/XX4/
+# python 01_score.py --result aX
+# python 01_score.py --result Xa-

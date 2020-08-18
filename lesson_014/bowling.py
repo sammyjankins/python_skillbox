@@ -1,3 +1,6 @@
+import logging
+
+
 class Frame(object):
     valid_symbols = '123456789-/X'
 
@@ -54,11 +57,14 @@ class Game(object):
         for frame in frames:
             frame.eval_frame()
             self.score += frame.points
-        print(f'Game result: {self.game_result} ::: {self.score} points!\n')
+        message = f'Game result: {self.game_result} ::: {self.score} points!'
+        print(message)
+        logging.info(message)
 
     def eval_pairs(self):
         v_pairs = [self._game_result[i: i + 2] for i in range(0, len(self._game_result) - 1, 2)]
         self.pairs.extend(v_pairs)
+        logging.debug(str(self.pairs))
         self.frames_amount += len(self.pairs)
         if self.frames_amount > 10:
             raise Exception("Incorrect number of frames in line: you can't play more than 10 frames!")
@@ -66,7 +72,9 @@ class Game(object):
         left = ''
         if self.frames_amount < 10:
             left = f', {10 - self.frames_amount} frame{"s" if self.frames_amount < 9 else ""} left!'
-        print(played, left)
+        message = f'{played}{left}'
+        print(message)
+        logging.info(message)
 
 
 class BadFrameError(Exception):
@@ -78,10 +86,13 @@ if __name__ == '__main__':
     game2 = Game('X4/34-4X2-1/X')
     game3 = Game('X--X--X--X----X')
     game4 = Game('X---/X---/X-/X')
-    game5 = Game('X')
+    game5 = Game('aX')
 
     game1.get_score()
     game2.get_score()
     game3.get_score()
     game4.get_score()
-    game5.get_score()
+    try:
+        game5.get_score()
+    except Exception as exc:
+        logging.exception(exc)
