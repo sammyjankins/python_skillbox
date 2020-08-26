@@ -1,6 +1,6 @@
 import logging
 
-
+# TODO: raise Exception везде нужно заменить на кастомное исключение
 class Frame(object):
     valid_symbols = '123456789-/X'
 
