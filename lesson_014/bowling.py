@@ -1,6 +1,6 @@
 import logging
 
-# TODO: raise Exception везде нужно заменить на кастомное исключение
+
 class Frame(object):
     valid_symbols = '123456789-/X'
 
@@ -25,7 +25,7 @@ class Frame(object):
             if points <= 9:
                 self.points += points
             else:
-                raise Exception(f'{points} - incorrect frame score')
+                raise BadFrameError(f'{points} - incorrect frame score')
 
     def validate_frame(self):
         # Проверка фрейма на валидность символов
@@ -41,25 +41,30 @@ class Frame(object):
 
 class Game(object):
 
-    def __init__(self, game_result):
+    def __init__(self, game_result, cons_print=False):
         self.score = 0
         self.frames_amount = 0
         self.pairs = []
         self.game_result = game_result
         self._game_result = ''
+        self.cons_print = cons_print
+
+    def info_prints(self, message):
+        if self.cons_print:
+            print(message)
+            logging.info(message)
 
     def get_score(self):
         self._game_result = self.game_result.replace('X', 'X-')
         if len(self._game_result) % 2:
-            raise Exception('Incorrect frame sequence')
+            raise BadGameError('Incorrect frame sequence')
         self.eval_pairs()
         frames = (Frame(frame_line) for frame_line in self.pairs)
         for frame in frames:
             frame.eval_frame()
             self.score += frame.points
         message = f'Game result: {self.game_result} ::: {self.score} points!'
-        print(message)
-        logging.info(message)
+        self.info_prints(message)
 
     def eval_pairs(self):
         v_pairs = [self._game_result[i: i + 2] for i in range(0, len(self._game_result) - 1, 2)]
@@ -67,17 +72,20 @@ class Game(object):
         logging.debug(str(self.pairs))
         self.frames_amount += len(self.pairs)
         if self.frames_amount > 10:
-            raise Exception("Incorrect number of frames in line: you can't play more than 10 frames!")
+            raise BadGameError("Incorrect number of frames in line: you can't play more than 10 frames!")
         played = f'{self.frames_amount} frame{"s" if self.frames_amount > 1 else ""} played'
         left = ''
         if self.frames_amount < 10:
             left = f', {10 - self.frames_amount} frame{"s" if self.frames_amount < 9 else ""} left!'
         message = f'{played}{left}'
-        print(message)
-        logging.info(message)
+        self.info_prints(message)
 
 
 class BadFrameError(Exception):
+    pass
+
+
+class BadGameError(Exception):
     pass
 
 

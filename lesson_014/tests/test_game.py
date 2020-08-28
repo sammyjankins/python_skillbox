@@ -1,5 +1,5 @@
 import unittest
-from lesson_014.bowling import Game
+from lesson_014.bowling import Game, BadFrameError, BadGameError
 
 
 class GameFrame(unittest.TestCase):
@@ -44,19 +44,19 @@ class GameFrame(unittest.TestCase):
         self.assertEqual(self.game5.score, 0)
 
     def test_bad_game1(self):
-        with self.assertRaises(Exception):  # TODO: какое именно исключение выстрелит знать также важно
+        with self.assertRaises(BadFrameError):
             self.bad_game_1.get_score()
 
     def test_bad_game2(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(BadGameError):
             self.bad_game_2.get_score()
 
     def test_bad_game3(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(BadFrameError):
             self.bad_game_3.get_score()
 
     def test_incorrect_sequence(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(BadGameError):
             self.incorrect_sequence.get_score()
 
 

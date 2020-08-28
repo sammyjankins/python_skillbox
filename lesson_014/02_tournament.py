@@ -26,7 +26,44 @@
 # Из текущего файла сделать консольный скрипт для формирования файла с результатами турнира.
 # Параметры скрипта: --input <файл протокола турнира> и --output <файл результатов турнира>
 
-# TODO тут ваш код
+import argparse
+
+from eval_protocol import Protocol
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--input', action='store', dest='input', required=True, help='Input file path')
+    parser.add_argument('--output', action='store', dest='output', required=True, help='Output file path')
+    args = parser.parse_args()
+    protocol = Protocol(args.input)
+    protocol.run()
+
+    write_to_file(args, protocol)
+    print_rate_table(protocol)
+
+
+def write_to_file(args, protocol):
+    with open(args.output, mode='w', encoding='utf8') as file:
+        for line in protocol.results:
+            file.write(line)
+
+
+def print_rate_table(protocol):
+    print('+----------+------------------+--------------+\n'
+          '|  Игрок   |  сыграно матчей  |  всего побед |\n'
+          '+----------+------------------+--------------+')
+    for player in sorted(protocol.rate,
+                         key=lambda x: protocol.rate[x]['victories'],
+                         reverse=True):
+        print(f'|{player:^10}|'
+              f'{protocol.rate[player]["games"]:^18}|'
+              f'{protocol.rate[player]["victories"]:^14}|')
+    print('+----------+------------------+--------------+\n')
+
+
+if __name__ == '__main__':
+    main()
 
 # Усложненное задание (делать по желанию)
 #
