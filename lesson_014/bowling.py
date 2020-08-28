@@ -49,11 +49,6 @@ class Game(object):
         self._game_result = ''
         self.cons_print = cons_print
 
-    def info_prints(self, message):
-        if self.cons_print:
-            print(message)
-            logging.info(message)
-
     def get_score(self):
         self._game_result = self.game_result.replace('X', 'X-')
         if len(self._game_result) % 2:
@@ -64,7 +59,10 @@ class Game(object):
             frame.eval_frame()
             self.score += frame.points
         message = f'Game result: {self.game_result} ::: {self.score} points!'
-        self.info_prints(message)
+
+        if self.cons_print:
+            print(message)
+        logging.info(message)
 
     def eval_pairs(self):
         v_pairs = [self._game_result[i: i + 2] for i in range(0, len(self._game_result) - 1, 2)]
@@ -78,7 +76,10 @@ class Game(object):
         if self.frames_amount < 10:
             left = f', {10 - self.frames_amount} frame{"s" if self.frames_amount < 9 else ""} left!'
         message = f'{played}{left}'
-        self.info_prints(message)
+
+        if self.cons_print:
+            print(message)
+        logging.info(message)
 
 
 class BadFrameError(Exception):

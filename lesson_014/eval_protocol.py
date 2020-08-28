@@ -1,3 +1,4 @@
+import logging
 from collections import defaultdict
 from pprint import pprint
 
@@ -39,6 +40,7 @@ class Protocol:
                     self.winner = [player, score]
             except (BadFrameError, BadGameError) as exc:
                 self.results.append(f'{player:10}{result:28}{exc}\n')
+                logging.exception(exc)
         else:
             self.results.append(f'{line}\n')
 

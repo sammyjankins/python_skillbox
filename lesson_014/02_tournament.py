@@ -27,11 +27,20 @@
 # Параметры скрипта: --input <файл протокола турнира> и --output <файл результатов турнира>
 
 import argparse
+import logging
 
 from eval_protocol import Protocol
 
+FORMAT = '[%(asctime)-15s] %(message)s'
+
 
 def main():
+    logging.basicConfig(
+        format=FORMAT,
+        level=logging.INFO,
+        handlers=[logging.FileHandler('log_bowling.log', 'a', 'utf-8')],
+    )
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', action='store', dest='input', required=True, help='Input file path')
     parser.add_argument('--output', action='store', dest='output', required=True, help='Output file path')
