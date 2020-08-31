@@ -83,3 +83,5 @@ if __name__ == '__main__':
 # python 01_score.py --result 1X4/34-4X2-1/XX4/
 # python 01_score.py --result aX
 # python 01_score.py --result Xa-
+
+# зачет!
