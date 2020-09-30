@@ -91,17 +91,17 @@ class BadGameError(Exception):
 
 
 if __name__ == '__main__':
-    game1 = Game('X4/34-4X2-1/XX4/')
-    game2 = Game('X4/34-4X2-1/X')
-    game3 = Game('X--X--X--X----X')
-    game4 = Game('X---/X---/X-/X')
+    game1 = Game('X4/34-4X2-1/XX4/', True)
+    game2 = Game('X4/34-4X2-1/X', True)
+    game3 = Game('X--X--X--X----X', True)
+    game4 = Game('X---/X---/X-/X', True)
     game5 = Game('aX')
 
     game1.get_score()
-    game2.get_score()
-    game3.get_score()
-    game4.get_score()
-    try:
-        game5.get_score()
-    except Exception as exc:
-        logging.exception(exc)
+    # game2.get_score()
+    # game3.get_score()
+    # game4.get_score()
+    # try:
+    #     game5.get_score()
+    # except Exception as exc:
+    #     logging.exception(exc)

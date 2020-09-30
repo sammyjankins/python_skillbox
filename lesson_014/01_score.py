@@ -40,7 +40,8 @@
 import argparse
 import logging
 
-from bowling import Game
+# from bowling import Game
+from bowling_state import Game
 
 FORMAT = '[%(asctime)-15s] %(message)s'
 

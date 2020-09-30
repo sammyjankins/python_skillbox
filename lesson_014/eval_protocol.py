@@ -2,7 +2,8 @@ import logging
 from collections import defaultdict
 from pprint import pprint
 
-from bowling import Game, BadFrameError, BadGameError
+# from bowling import Game, BadFrameError, BadGameError
+from bowling_state import Game, BadFrameError, BadGameError
 
 
 class Protocol:
