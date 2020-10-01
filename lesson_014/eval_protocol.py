@@ -10,7 +10,6 @@ class Protocol:
 
     def __init__(self, filename):
         self.filename = filename
-        self.tour = 0
         self.results = []
         self.winner = ['', 0]
         self.rate = defaultdict(lambda: {'games': 0, 'victories': 0})
@@ -47,6 +46,10 @@ class Protocol:
 
 
 if __name__ == '__main__':
-    prot = Protocol('tournament.txt')
-    prot.run()
-    pprint(prot.results)
+    # prot = Protocol('tournament.txt')
+    # prot.run()
+    # pprint(prot.results)
+    # pprint(prot.rate)
+    protocol_1 = Protocol('')
+    protocol_1.process_line('Елена	3532X332/3/64--62X')
+    print(protocol_1.results)

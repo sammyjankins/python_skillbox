@@ -1,5 +1,5 @@
 import unittest
-from lesson_014.bowling import Game, BadFrameError, BadGameError
+from lesson_014.bowling_state import Game, BadFrameError, BadGameError
 
 
 class TestGame(unittest.TestCase):
@@ -21,22 +21,22 @@ class TestGame(unittest.TestCase):
     def test_game1(self):
         self.game1.get_score()
         self.assertEqual(self.game1.frames_amount, 10)
-        self.assertEqual(self.game1.score, 138)
+        self.assertEqual(self.game1.score, 132)
 
     def test_game2(self):
         self.game2.get_score()
         self.assertEqual(self.game2.frames_amount, 8)
-        self.assertEqual(self.game2.score, 103)
+        self.assertEqual(self.game2.score, 88)
 
     def test_game3(self):
         self.game3.get_score()
         self.assertEqual(self.game3.frames_amount, 10)
-        self.assertEqual(self.game3.score, 100)
+        self.assertEqual(self.game3.score, 50)
 
     def test_game4(self):
         self.game4.get_score()
         self.assertEqual(self.game4.frames_amount, 1)
-        self.assertEqual(self.game4.score, 20)
+        self.assertEqual(self.game4.score, 10)
 
     def test_game5(self):
         self.game5.get_score()
@@ -56,7 +56,7 @@ class TestGame(unittest.TestCase):
             self.bad_game_3.get_score()
 
     def test_incorrect_sequence(self):
-        with self.assertRaises(BadGameError):
+        with self.assertRaises(BadFrameError):
             self.incorrect_sequence.get_score()
 
 

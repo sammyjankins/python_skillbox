@@ -159,6 +159,7 @@ class BadGameError(Exception):
 
 class Game:
     score = 0
+    frames_amount = 0
 
     def __init__(self, result_line, cons_print=False):
         self.result_line = result_line
@@ -172,6 +173,7 @@ class Game:
         left = ''
         if frame.number_of_frame < 10:
             left = f', {10 - frame.number_of_frame} frame{"s" if frame.number_of_frame < 9 else ""} left!'
+        self.frames_amount = frame.number_of_frame
         message = f'{result}{played}{left}'
 
         if self.cons_print:
@@ -202,7 +204,7 @@ if __name__ == "__main__":
 
     # game.get_score()
     # game1.get_score()
-    game2.get_score()
+    # game2.get_score()
     # game3.get_score()
     # game4.get_score()
-    # game5.get_score()
+    game5.get_score()
