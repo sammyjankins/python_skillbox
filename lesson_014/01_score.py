@@ -62,9 +62,11 @@ def main():
     game = Game(arg)
     try:
         game.get_score()
+        print(game.score)
     except Exception as exc:
-        print(exc)
-        logging.exception(f'For game result: {arg} -> {exc}')
+        message = f'For game result: {arg} -> {exc}'
+        print(message)
+        logging.exception(message)
 
 
 if __name__ == '__main__':

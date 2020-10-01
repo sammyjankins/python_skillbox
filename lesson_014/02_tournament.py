@@ -29,7 +29,7 @@
 import argparse
 import logging
 
-from eval_protocol import Protocol  # TODO: на Protocol тоже нужны тесты
+from eval_protocol import Protocol
 
 FORMAT = '[%(asctime)-15s] %(message)s'
 

@@ -1,8 +1,9 @@
 import logging
 from collections import defaultdict
-from pprint import pprint
 
 # from bowling import Game, BadFrameError, BadGameError
+from pprint import pprint
+
 from bowling_state import Game, BadFrameError, BadGameError
 
 
@@ -46,10 +47,7 @@ class Protocol:
 
 
 if __name__ == '__main__':
-    # prot = Protocol('tournament.txt')
-    # prot.run()
-    # pprint(prot.results)
-    # pprint(prot.rate)
-    protocol_1 = Protocol('')
-    protocol_1.process_line('Елена	3532X332/3/64--62X')
-    print(protocol_1.results)
+    prot = Protocol('tournament.txt')
+    prot.run()
+    pprint(prot.results)
+    pprint(prot.rate)

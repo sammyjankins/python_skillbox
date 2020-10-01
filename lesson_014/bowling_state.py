@@ -195,16 +195,15 @@ class Game:
 
 
 if __name__ == "__main__":
-    game = Game('XXX347/21', True)
-    game1 = Game('X4/34', True)
-    game2 = Game('X4/34-4X2-1/XX4/', True)
-    game3 = Game('X4/34-4X2-1/X', True)
-    game4 = Game('X--X--X--X----X', True)
-    game5 = Game('X46-/X---/X-/X', True)
+    games = [
+        Game('XXX347/21', True),
+        Game('X4/34', True),
+        Game('X4/34-4X2-1/XX4/', True),
+        Game('X4/34-4X2-1/X', True),
+        Game('X--X--X--X----X', True),
+        Game('X46-/X---/X-/X', True),
+        ]
 
-    # game.get_score()
-    # game1.get_score()
-    # game2.get_score()
-    # game3.get_score()
-    # game4.get_score()
-    game5.get_score()
+    for game in games:
+        game.get_score()
+        print('\n================================================\n')
