@@ -91,12 +91,99 @@
 #  ...
 #
 # и так далее...
-
+import json
+import random
+import re
+from pprint import pprint
 
 remaining_time = '123456.0987654321'
 # если изначально не писать число в виде строки - теряется точность!
 field_names = ['current_location', 'current_experience', 'current_date']
 
-# TODO тут ваш код
+
+class Enemy:
+
+    def __init__(self, name, exp, time):
+        self.name = name
+        self.exp = exp
+        self.time = time
+
+    def __repr__(self):
+        return f'{self.name}(exp={self.exp}, time={self.time})'
+
+    def __str__(self):
+        return (f'{self.__class__.__name__}: {self.name}, \n'
+                f'{f"опыт за победу - {self.exp}, " if self.exp else ""}'
+                f'время на победу - {self.time}')
+
+
+class Monster(Enemy):
+    output_texts = {
+        'action': 'Атаковать монстра',
+        'desctioption': 'Монстра',
+        'attack': 'сражаться с монстром',
+    }
+
+
+class Boss(Enemy):
+    output_texts = {
+        'action': 'Атаковать босса',
+        'desctioption': 'Босса',
+        'attack': 'сражаться с боссом',
+    }
+
+
+class Game:
+    ENEMIES = {
+        'Mob': Monster,
+        'Boss': Boss,
+    }
+
+    def __init__(self):
+        self.game_map = dict()
+        self.level_events = dict()
+        self.monster_names = dict()
+        self.current_location = ''
+
+    def main(self):
+        self.init_game_values()
+        self.level_description()
+        pprint(self.level_events)
+
+    def init_game_values(self):
+        with open('rpg.json', mode='r', encoding='utf8') as map_data:
+            self.game_map = json.load(map_data)
+        with open('names_data.json', mode='r', encoding='utf8') as json_file:
+            self.monster_names = json.load(json_file)
+        for key in self.game_map.keys():
+            self.current_location = key
+
+        pprint(self.game_map)
+        # x = self.input_handling('enter something:\n>> ', 4)
+        # print(f'you entered {x}')
+
+    def level_description(self):
+        self.level_events.clear()
+        for i, event in enumerate(self.game_map[self.current_location]):
+            if isinstance(event, str):
+                self.level_events[i] = self.init_event(event)
+            else:
+                for key in event:
+                    self.level_events[i] = key
+
+    def name_generator(self):
+        return f'{random.choice(self.monster_names["adjective"])} {random.choice(self.monster_names["noun"])}'
+
+    def init_event(self, event_name):
+        event_parameters = event_name.split('_')
+        name = self.name_generator()
+        exp = re.search(r'(\d+)', event_parameters[1]).group() if 'exp' in event_name else 0
+        time = re.search(r'(\d+)', event_parameters[2]).group()
+        enemy_type = event_parameters[0]
+        return self.ENEMIES[enemy_type](name=name, exp=exp, time=time)
+
+
+game = Game()
+game.main()
 
 # Учитывая время и опыт, не забывайте о точности вычислений!

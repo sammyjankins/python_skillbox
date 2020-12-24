@@ -4,3 +4,4 @@ pygame==2.0.0.dev8
 qrcode==6.1
 simple-draw==2.6.8
 six==1.15.0
+termcolor==1.1.0
