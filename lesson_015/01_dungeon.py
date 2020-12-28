@@ -96,91 +96,230 @@ import random
 import re
 from pprint import pprint
 
+from termcolor import cprint, colored
+
+from lesson_015.utils import user_input_handling
+
 remaining_time = '123456.0987654321'
 # если изначально не писать число в виде строки - теряется точность!
 field_names = ['current_location', 'current_experience', 'current_date']
 
 
-class Enemy:
+class Monster:
+    monster_names = dict()
 
-    def __init__(self, name, exp, time):
-        self.name = name
-        self.exp = exp
-        self.time = time
+    def __init__(self, event_name):
+        self.event_name = event_name
+        self.name = ''
+        self.exp = 0
+        self.time = 0
 
     def __repr__(self):
         return f'{self.name}(exp={self.exp}, time={self.time})'
 
     def __str__(self):
-        return (f'{self.__class__.__name__}: {self.name}, \n'
-                f'{f"опыт за победу - {self.exp}, " if self.exp else ""}'
-                f'время на победу - {self.time}')
+        return f'{self.event_name}: {self.name}, время на победу - {self.time}'
+
+    @classmethod
+    def init_names(cls):
+        if len(cls.monster_names) == 0:
+            with open('names_data.json', mode='r', encoding='utf8') as json_file:
+                cls.monster_names = json.load(json_file)
+
+    def init_mob(self):
+        mob_parameters = self.event_name.split('_')
+        self.exp, self.time = [re.search(r'(\d+)', value).group() for value in mob_parameters[1:]]
+        self.name = f'{random.choice(self.monster_names["adjective"])} {random.choice(self.monster_names["noun"])}'
 
 
-class Monster(Enemy):
-    output_texts = {
-        'action': 'Атаковать монстра',
-        'desctioption': 'Монстра',
-        'attack': 'сражаться с монстром',
-    }
+class Location:
+
+    def __init__(self, name):
+        self.name = name
+        self.exp = 0
+        self.time = 0
+        self.number = 0
+        self.options = []
+        self.mobs = []
+        self.locations = []
+        self.evaluated = False
+
+    def __str__(self):
+        return self.name
+
+    def init_loc(self):
+        loc_parameters = self.name.split('_')
+        self.number, self.time = [re.search(r'(\d+)', value).group() for value in loc_parameters[1:]]
+
+    def show_content(self):
+        for event in self.mobs + self.locations:
+            if isinstance(event, Location):
+                cprint(f'— Вход в локацию: {event}', color='cyan')
+            else:
+                cprint(f'- Монстр ({event.event_name}) по кличке {event.name}', color='magenta')
+        cprint('\nВыберите действие:', color='yellow')
+        self.eval_options()
+
+    def eval_options(self):
+        self.options = ['Атаковать монстра' * bool(self.mobs),
+                        'Перейти в другую локацию' * bool(self.locations),
+                        'Сдаться и выйти из игры']
+        self.options = {i + 1: option for i, option in enumerate(filter(lambda x: x, self.options))}
+
+    def get_mob(self, index):
+        return self.mobs[index]
+
+    def get_location(self, index):
+        return self.locations[index]
 
 
-class Boss(Enemy):
-    output_texts = {
-        'action': 'Атаковать босса',
-        'desctioption': 'Босса',
-        'attack': 'сражаться с боссом',
-    }
+class Player:
+
+    def __init__(self):
+        self.exp = 0
+        self.time = float(remaining_time)
+        self.win = False
+
+    def action(self, time, exp=0):
+        self.time -= time
+        self.exp += exp
+
+    def __str__(self):
+        return f'У вас {self.exp} опыта и {self.time} секунд до наводнения\n'
 
 
 class Game:
-    ENEMIES = {
-        'Mob': Monster,
-        'Boss': Boss,
-    }
 
     def __init__(self):
         self.game_map = dict()
-        self.level_events = dict()
-        self.monster_names = dict()
-        self.current_location = ''
+        self.current_location = None
+        self.player = None
+        self.round = 0
 
     def main(self):
+        self.player = Player()
         self.init_game_values()
-        self.level_description()
-        pprint(self.level_events)
+
+        while True:
+            self.round += 1
+            cprint('=' * 55, color='blue')
+            cprint(f'{f" " * 23}Ход - {self.round}', color='blue')
+            cprint('=' * 55, color='blue')
+            print()
+            self.eval_level_content()
+            self.print_current_stat()
+            self.current_location.show_content()
+            try:
+                self.print_options()
+            except GameOverException as e:
+                print(e.message)
+                break
 
     def init_game_values(self):
+        Monster.init_names()
         with open('rpg.json', mode='r', encoding='utf8') as map_data:
             self.game_map = json.load(map_data)
-        with open('names_data.json', mode='r', encoding='utf8') as json_file:
-            self.monster_names = json.load(json_file)
         for key in self.game_map.keys():
-            self.current_location = key
+            location = Location(key)
+            location.init_loc()
+            self.game_map = self.game_map[location.name]
+            self.current_location = location
 
-        pprint(self.game_map)
-        # x = self.input_handling('enter something:\n>> ', 4)
-        # print(f'you entered {x}')
+    def eval_level_content(self):
+        if not self.current_location.evaluated:
+            for i, event in enumerate(self.game_map):
+                if isinstance(event, str):
+                    monster = Monster(event)
+                    monster.init_mob()
+                    self.current_location.mobs.append(monster)
+                else:
+                    for key in event:
+                        location = Location(key)
+                        location.init_loc()
+                        self.current_location.locations.append(location)
+            self.current_location.evaluated = True
 
-    def level_description(self):
-        self.level_events.clear()
-        for i, event in enumerate(self.game_map[self.current_location]):
+    def print_current_stat(self):
+        cprint(f'Вы находитесь в {self.current_location}', color='yellow')
+        cprint(self.player, color='green')
+        cprint('Внутри вы видите:', color='yellow')
+
+    def print_options(self):
+        general_options = {
+            'Атаковать монстра': {'color': 'magenta',
+                                  'action': self.attack_mob},
+            'Перейти в другую локацию': {'color': 'cyan',
+                                         'action': self.go_to_level},
+            'Сдаться и выйти из игры': {'color': 'red',
+                                        'action': self.give_up},
+        }
+        level_options = ''.join([colored(f'{key}. {value}\n', general_options[value]['color'])
+                                 for key, value in self.current_location.options.items()])
+        print(level_options)
+        ans = user_input_handling(colored('>> ', color='yellow'),
+                                  len(self.current_location.options))
+        general_options[self.current_location.options[ans]]['action']()
+
+    def go_to_level(self):
+        next_location = self.action(self.current_location.locations,
+                                    'cyan',
+                                    'Выберите локацию:',
+                                    'Переход на локацию')
+        print(self.game_map)
+        self.update_map(next_location)
+        print(self.game_map)
+
+    def update_map(self, next_location):
+        self.current_location = next_location
+        for event in self.game_map:
             if isinstance(event, str):
-                self.level_events[i] = self.init_event(event)
+                continue
+            elif next_location.name not in event:
+                continue
             else:
-                for key in event:
-                    self.level_events[i] = key
+                self.game_map = event[next_location.name]
 
-    def name_generator(self):
-        return f'{random.choice(self.monster_names["adjective"])} {random.choice(self.monster_names["noun"])}'
+    def attack_mob(self):
+        defeated_mob = self.action(self.current_location.mobs,
+                                   'magenta',
+                                   'Выберите монстра:',
+                                   'Атака на монстра')
+        print(f'Вы победили - {defeated_mob}')
 
-    def init_event(self, event_name):
-        event_parameters = event_name.split('_')
-        name = self.name_generator()
-        exp = re.search(r'(\d+)', event_parameters[1]).group() if 'exp' in event_name else 0
-        time = re.search(r'(\d+)', event_parameters[2]).group()
-        enemy_type = event_parameters[0]
-        return self.ENEMIES[enemy_type](name=name, exp=exp, time=time)
+    def action(self, collection, color, text1, text2):
+        if len(collection) > 1:
+            cprint(text1, color='yellow')
+            for i, obj in enumerate(collection):
+                cprint(f'{i + 1}. {obj}', color=color)
+            ans = user_input_handling(colored('>> ', color='yellow'),
+                                      len(collection))
+            obj = collection.pop(ans - 1)
+        else:
+            obj = collection.pop()
+        cprint(f'{text2} {obj}', color=color)
+        self.player.action(time=int(obj.time), exp=int(obj.exp))
+        if self.player.time <= 0:
+            raise GameOverException(text=colored('Произошло наводнение, вы не успели спастить!', color='red'),
+                                    player=self.player)
+        cprint(self.player, color='green')
+        return obj
+
+    def give_up(self):
+        raise GameOverException(text=colored('Вы приняли решение покинуть игру.', color='red'), player=self.player)
+
+    def select_event(self):
+        pass
+
+
+class GameOverException(Exception):
+    win_msg = colored("Вы победили!", "green")
+    lose_msg = colored("Вы проиграли!", "red")
+
+    def __init__(self, text, player, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.message = (f'\n{text}\n'
+                        f'{self.win_msg if player.win else self.lose_msg}\n'
+                        f'{colored(f"Опыт к концу игры: {player.exp}", "yellow")}')
 
 
 game = Game()
