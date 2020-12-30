@@ -94,6 +94,7 @@
 import json
 import random
 import re
+from decimal import Decimal, getcontext
 from pprint import pprint
 
 from termcolor import cprint, colored
@@ -103,6 +104,12 @@ from lesson_015.utils import user_input_handling
 remaining_time = '123456.0987654321'
 # если изначально не писать число в виде строки - теряется точность!
 field_names = ['current_location', 'current_experience', 'current_date']
+getcontext().prec = len(remaining_time) + 1
+
+
+# возможно будет декоратор для подготовки csv
+def dec():
+    pass
 
 
 class Monster:
@@ -111,8 +118,8 @@ class Monster:
     def __init__(self, event_name):
         self.event_name = event_name
         self.name = ''
-        self.exp = 0
-        self.time = 0
+        self.exp = None
+        self.time = None
 
     def __repr__(self):
         return f'{self.name}(exp={self.exp}, time={self.time})'
@@ -122,13 +129,16 @@ class Monster:
 
     @classmethod
     def init_names(cls):
+        """Заполнение атрибута класса именами из json файла для дальнейшей рандомной генерации в методе init_mob.
+        (привет Diablo 2, все имена выдуманы автором кода по собственной инициативе и, как ни удивительно,
+        не имеют отношения к реальным личностям)"""
         if len(cls.monster_names) == 0:
             with open('names_data.json', mode='r', encoding='utf8') as json_file:
                 cls.monster_names = json.load(json_file)
 
     def init_mob(self):
         mob_parameters = self.event_name.split('_')
-        self.exp, self.time = [re.search(r'(\d+)', value).group() for value in mob_parameters[1:]]
+        self.exp, self.time = [Decimal(re.search(r'(\d+)', value).group()) for value in mob_parameters[1:]]
         self.name = f'{random.choice(self.monster_names["adjective"])} {random.choice(self.monster_names["noun"])}'
 
 
@@ -136,9 +146,8 @@ class Location:
 
     def __init__(self, name):
         self.name = name
-        self.exp = 0
-        self.time = 0
-        self.number = 0
+        self.exp = None
+        self.time = None
         self.options = []
         self.mobs = []
         self.locations = []
@@ -148,8 +157,9 @@ class Location:
         return self.name
 
     def init_loc(self):
-        loc_parameters = self.name.split('_')
-        self.number, self.time = [re.search(r'(\d+)', value).group() for value in loc_parameters[1:]]
+        loc_time = self.name.split('_')
+        time = re.search(r'(\d+.?\d+)', loc_time[-1])
+        self.time = Decimal(time.group() if time else 0)  # потому что time пожет оказаться None
 
     def show_content(self):
         for event in self.mobs + self.locations:
@@ -161,28 +171,25 @@ class Location:
         self.eval_options()
 
     def eval_options(self):
+        """Действия, которые возможно совершить в течение хода зависят от заполненности контейнеров с переходами
+        на локации и монстрами"""
         self.options = ['Атаковать монстра' * bool(self.mobs),
                         'Перейти в другую локацию' * bool(self.locations),
                         'Сдаться и выйти из игры']
         self.options = {i + 1: option for i, option in enumerate(filter(lambda x: x, self.options))}
 
-    def get_mob(self, index):
-        return self.mobs[index]
-
-    def get_location(self, index):
-        return self.locations[index]
-
 
 class Player:
 
     def __init__(self):
-        self.exp = 0
-        self.time = float(remaining_time)
+        self.exp = Decimal()
+        self.time = Decimal(remaining_time)
         self.win = False
 
     def action(self, time, exp=0):
         self.time -= time
-        self.exp += exp
+        if exp:
+            self.exp += exp
 
     def __str__(self):
         return f'У вас {self.exp} опыта и {self.time} секунд до наводнения\n'
@@ -216,6 +223,7 @@ class Game:
                 break
 
     def init_game_values(self):
+        """Инициализация карты и текущей локации перед первым ходом"""
         Monster.init_names()
         with open('rpg.json', mode='r', encoding='utf8') as map_data:
             self.game_map = json.load(map_data)
@@ -265,19 +273,30 @@ class Game:
                                     'cyan',
                                     'Выберите локацию:',
                                     'Переход на локацию')
-        print(self.game_map)
         self.update_map(next_location)
-        print(self.game_map)
 
     def update_map(self, next_location):
+        """Апдейт карты при выборе перехода на другую локацию, либо попытка открыть люк"""
         self.current_location = next_location
-        for event in self.game_map:
-            if isinstance(event, str):
-                continue
-            elif next_location.name not in event:
-                continue
-            else:
-                self.game_map = event[next_location.name]
+        if self.current_location.name.startswith('Hatch'):
+            self.try_open_hatch()
+        else:
+            for event in self.game_map:
+                if isinstance(event, str):
+                    continue
+                elif next_location.name not in event:
+                    continue
+                else:
+                    self.game_map = event[next_location.name]
+
+    def try_open_hatch(self):
+        if self.player.exp >= 280:
+            self.player.win = True
+            raise GameOverException(text=colored('Вам удалось открыть люк!', color='green'),
+                                    player=self.player)
+        else:
+            cprint('Вы пытаетесь открыть люк, но он не поддается...', color='red')
+            return
 
     def attack_mob(self):
         defeated_mob = self.action(self.current_location.mobs,
@@ -287,6 +306,9 @@ class Game:
         print(f'Вы победили - {defeated_mob}')
 
     def action(self, collection, color, text1, text2):
+        """Выполнение действия над объектом, в зависимости от переданного в параменты контейнера (в котором хранятся,
+        соответственно, Монстры или Локации) и текста. Если в контейнере один объект, действие выполняется над ним
+        автоматически."""
         if len(collection) > 1:
             cprint(text1, color='yellow')
             for i, obj in enumerate(collection):
@@ -297,7 +319,7 @@ class Game:
         else:
             obj = collection.pop()
         cprint(f'{text2} {obj}', color=color)
-        self.player.action(time=int(obj.time), exp=int(obj.exp))
+        self.player.action(time=obj.time, exp=obj.exp)
         if self.player.time <= 0:
             raise GameOverException(text=colored('Произошло наводнение, вы не успели спастить!', color='red'),
                                     player=self.player)
@@ -306,9 +328,6 @@ class Game:
 
     def give_up(self):
         raise GameOverException(text=colored('Вы приняли решение покинуть игру.', color='red'), player=self.player)
-
-    def select_event(self):
-        pass
 
 
 class GameOverException(Exception):
@@ -326,3 +345,6 @@ game = Game()
 game.main()
 
 # Учитывая время и опыт, не забывайте о точности вычислений!
+
+if __name__ == '__main__':
+    path_to_save = 'dungeon.csv'
