@@ -91,9 +91,11 @@
 #  ...
 #
 # и так далее...
+import csv
 import json
 import random
 import re
+from datetime import datetime, time
 from decimal import Decimal, getcontext
 from pprint import pprint
 
@@ -108,8 +110,33 @@ getcontext().prec = len(remaining_time) + 1
 
 
 # возможно будет декоратор для подготовки csv
-def dec():
-    pass
+
+def game_to_csv(save_path):
+    def decorator(method):
+        _progress = []
+
+        def wrapper(self):
+            _progress.append({'current_location': self.current_location,
+                              'current_experience': self.player.exp,
+                              'current_date': datetime.today()})
+
+            passed_delta = datetime.today() - _progress[0]['current_date']
+            minutes, seconds = divmod(passed_delta.seconds, 60)
+            passed_time = time(minute=minutes, second=seconds)
+            cprint(f'Прошло времени: {passed_time.strftime("%M:%S")}', color='green')
+
+            method(self)
+            # current_location, current_experience, current_date
+
+            if self.over:
+                with open(save_path, 'w', newline='') as out_csv:
+                    writer = csv.DictWriter(out_csv, delimiter=',', fieldnames=list(_progress[0].keys()))
+                    writer.writeheader()
+                    writer.writerows(_progress)
+
+        return wrapper
+
+    return decorator
 
 
 class Monster:
@@ -191,8 +218,12 @@ class Player:
         if exp:
             self.exp += exp
 
+    def reborn(self):
+        self.exp = Decimal()
+        self.time = Decimal(remaining_time)
+
     def __str__(self):
-        return f'У вас {self.exp} опыта и {self.time} секунд до наводнения\n'
+        return f'У вас {self.exp} опыта и {self.time} секунд до наводнения'
 
 
 class Game:
@@ -201,29 +232,43 @@ class Game:
         self.game_map = dict()
         self.current_location = None
         self.player = None
-        self.round = 0
+        self.round = 1
+        self.over = False
 
     def main(self):
         self.player = Player()
         self.init_game_values()
 
-        while True:
-            self.round += 1
-            cprint('=' * 55, color='blue')
+        while not self.over:
+            cprint(f'\n{"=" * 55}', color='blue')
             cprint(f'{f" " * 23}Ход - {self.round}', color='blue')
-            cprint('=' * 55, color='blue')
-            print()
-            self.eval_level_content()
-            self.print_current_stat()
-            self.current_location.show_content()
-            try:
-                self.print_options()
-            except GameOverException as e:
-                print(e.message)
-                break
+            cprint(f'{"=" * 55}\n', color='blue')
+
+            if self.round == 1:
+                cprint(f"{'*' * 53}\n"
+                       "Вы просыпаетесь и понимаете, что находитесь в самой \n"
+                       "глубокой пещере всего подземелья. Скоро все пещеры \n"
+                       "вновь затопит очередное наводнение, нужно спешить!\n"
+                       f"{'*' * 53}\n", color='magenta')
+
+            self.eval_game_round()
+
+    @game_to_csv('dungeon.csv')
+    def eval_game_round(self):
+        self.round += 1
+
+        self.eval_level_content()
+        self.print_current_stat()
+        self.current_location.show_content()
+        try:
+            self.print_options()
+        except GameOverException as e:
+            print(e.message)
 
     def init_game_values(self):
         """Инициализация карты и текущей локации перед первым ходом"""
+        self.round = 1
+        self.player.reborn()
         Monster.init_names()
         with open('rpg.json', mode='r', encoding='utf8') as map_data:
             self.game_map = json.load(map_data)
@@ -292,6 +337,7 @@ class Game:
     def try_open_hatch(self):
         if self.player.exp >= 280:
             self.player.win = True
+            self.over = True
             raise GameOverException(text=colored('Вам удалось открыть люк!', color='green'),
                                     player=self.player)
         else:
@@ -303,7 +349,6 @@ class Game:
                                    'magenta',
                                    'Выберите монстра:',
                                    'Атака на монстра')
-        print(f'Вы победили - {defeated_mob}')
 
     def action(self, collection, color, text1, text2):
         """Выполнение действия над объектом, в зависимости от переданного в параменты контейнера (в котором хранятся,
@@ -321,13 +366,18 @@ class Game:
         cprint(f'{text2} {obj}', color=color)
         self.player.action(time=obj.time, exp=obj.exp)
         if self.player.time <= 0:
-            raise GameOverException(text=colored('Произошло наводнение, вы не успели спастить!', color='red'),
+            self.init_game_values()
+            over_msg1 = colored('Произошло наводнение, вы не успели спастить!\n', color='red')
+            over_msg2 = colored('На ваше счастье, у последнего побежденного монстра\n'
+                                'вы успели урвать зелье реинкарнации!', color='magenta')
+            raise GameOverException(text=over_msg1 + over_msg2,
                                     player=self.player)
-        cprint(self.player, color='green')
         return obj
 
     def give_up(self):
-        raise GameOverException(text=colored('Вы приняли решение покинуть игру.', color='red'), player=self.player)
+        self.over = True
+        raise GameOverException(text=colored('Вы приняли решение покинуть игру.', color='red'),
+                                player=self.player)
 
 
 class GameOverException(Exception):
@@ -336,9 +386,10 @@ class GameOverException(Exception):
 
     def __init__(self, text, player, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.message = (f'\n{text}\n'
+        self.message = (f'{colored(f"Опыт к концу игры: {player.exp}", "yellow")}, '
+                        f'{colored(f"оставшееся время: {player.time} секунд", "yellow")}\n'
                         f'{self.win_msg if player.win else self.lose_msg}\n'
-                        f'{colored(f"Опыт к концу игры: {player.exp}", "yellow")}')
+                        f'\n{text}')
 
 
 game = Game()
