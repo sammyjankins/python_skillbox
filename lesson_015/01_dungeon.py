@@ -91,52 +91,23 @@
 #  ...
 #
 # и так далее...
-import csv
 import json
 import random
 import re
-from datetime import datetime, time
 from decimal import Decimal, getcontext
-from pprint import pprint
 
 from termcolor import cprint, colored
 
-from lesson_015.utils import user_input_handling
+from lesson_015.utils import user_input_handling, game_to_csv
 
 remaining_time = '123456.0987654321'
 # если изначально не писать число в виде строки - теряется точность!
 field_names = ['current_location', 'current_experience', 'current_date']
 getcontext().prec = len(remaining_time) + 1
+path_to_save = 'dungeon.csv'
 
 
 # возможно будет декоратор для подготовки csv
-
-def game_to_csv(save_path):
-    def decorator(method):
-        _progress = []
-
-        def wrapper(self):
-            _progress.append({'current_location': self.current_location,
-                              'current_experience': self.player.exp,
-                              'current_date': datetime.today()})
-
-            passed_delta = datetime.today() - _progress[0]['current_date']
-            minutes, seconds = divmod(passed_delta.seconds, 60)
-            passed_time = time(minute=minutes, second=seconds)
-            cprint(f'Прошло времени: {passed_time.strftime("%M:%S")}', color='green')
-
-            method(self)
-            # current_location, current_experience, current_date
-
-            if self.over:
-                with open(save_path, 'w', newline='') as out_csv:
-                    writer = csv.DictWriter(out_csv, delimiter=',', fieldnames=list(_progress[0].keys()))
-                    writer.writeheader()
-                    writer.writerows(_progress)
-
-        return wrapper
-
-    return decorator
 
 
 class Monster:
@@ -146,17 +117,17 @@ class Monster:
         self.event_name = event_name
         self.name = ''
         self.exp = None
-        self.time = None
+        self.time_cost = None
 
     def __repr__(self):
-        return f'{self.name}(exp={self.exp}, time={self.time})'
+        return f'{self.name}(exp={self.exp}, time={self.time_cost})'
 
     def __str__(self):
-        return f'{self.event_name}: {self.name}, время на победу - {self.time}'
+        return f'{self.event_name}: {self.name}, время на победу - {self.time_cost}'
 
     @classmethod
     def init_names(cls):
-        """Заполнение атрибута класса именами из json файла для дальнейшей рандомной генерации в методе init_mob.
+        """Заполнение атрибута monster_names именами из json файла для дальнейшей рандомной генерации в методе init_mob.
         (привет Diablo 2, все имена выдуманы автором кода по собственной инициативе и, как ни удивительно,
         не имеют отношения к реальным личностям)"""
         if len(cls.monster_names) == 0:
@@ -165,7 +136,7 @@ class Monster:
 
     def init_mob(self):
         mob_parameters = self.event_name.split('_')
-        self.exp, self.time = [Decimal(re.search(r'(\d+)', value).group()) for value in mob_parameters[1:]]
+        self.exp, self.time_cost = [Decimal(re.search(r'(\d+)', value).group()) for value in mob_parameters[1:]]
         self.name = f'{random.choice(self.monster_names["adjective"])} {random.choice(self.monster_names["noun"])}'
 
 
@@ -174,7 +145,7 @@ class Location:
     def __init__(self, name):
         self.name = name
         self.exp = None
-        self.time = None
+        self.time_cost = None
         self.options = []
         self.mobs = []
         self.locations = []
@@ -184,9 +155,9 @@ class Location:
         return self.name
 
     def init_loc(self):
-        loc_time = self.name.split('_')
-        time = re.search(r'(\d+.?\d+)', loc_time[-1])
-        self.time = Decimal(time.group() if time else 0)  # потому что time пожет оказаться None
+        loc_data = self.name.split('_')
+        loc_time = re.search(r'(\d+.?\d+)', loc_data[-1])
+        self.time_cost = Decimal(loc_time.group() if loc_time else 0)  # потому что loc_time пожет оказаться None
 
     def show_content(self):
         for event in self.mobs + self.locations:
@@ -210,20 +181,20 @@ class Player:
 
     def __init__(self):
         self.exp = Decimal()
-        self.time = Decimal(remaining_time)
+        self.rem_time = Decimal(remaining_time)
         self.win = False
 
-    def action(self, time, exp=0):
-        self.time -= time
+    def action(self, rem_time, exp=0):
+        self.rem_time -= rem_time
         if exp:
             self.exp += exp
 
     def reborn(self):
         self.exp = Decimal()
-        self.time = Decimal(remaining_time)
+        self.rem_time = Decimal(remaining_time)
 
     def __str__(self):
-        return f'У вас {self.exp} опыта и {self.time} секунд до наводнения'
+        return f'У вас {self.exp} опыта и {self.rem_time} секунд до наводнения'
 
 
 class Game:
@@ -253,7 +224,7 @@ class Game:
 
             self.eval_game_round()
 
-    @game_to_csv('dungeon.csv')
+    @game_to_csv(path_to_save)
     def eval_game_round(self):
         self.round += 1
 
@@ -345,10 +316,10 @@ class Game:
             return
 
     def attack_mob(self):
-        defeated_mob = self.action(self.current_location.mobs,
-                                   'magenta',
-                                   'Выберите монстра:',
-                                   'Атака на монстра')
+        self.action(self.current_location.mobs,
+                    'magenta',
+                    'Выберите монстра:',
+                    'Атака на монстра')
 
     def action(self, collection, color, text1, text2):
         """Выполнение действия над объектом, в зависимости от переданного в параменты контейнера (в котором хранятся,
@@ -364,8 +335,8 @@ class Game:
         else:
             obj = collection.pop()
         cprint(f'{text2} {obj}', color=color)
-        self.player.action(time=obj.time, exp=obj.exp)
-        if self.player.time <= 0:
+        self.player.action(rem_time=obj.time_cost, exp=obj.exp)
+        if self.player.rem_time <= 0:
             self.init_game_values()
             over_msg1 = colored('Произошло наводнение, вы не успели спастить!\n', color='red')
             over_msg2 = colored('На ваше счастье, у последнего побежденного монстра\n'
@@ -387,15 +358,13 @@ class GameOverException(Exception):
     def __init__(self, text, player, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.message = (f'{colored(f"Опыт к концу игры: {player.exp}", "yellow")}, '
-                        f'{colored(f"оставшееся время: {player.time} секунд", "yellow")}\n'
+                        f'{colored(f"оставшееся время: {player.rem_time} секунд", "yellow")}\n'
                         f'{self.win_msg if player.win else self.lose_msg}\n'
                         f'\n{text}')
 
 
-game = Game()
-game.main()
-
 # Учитывая время и опыт, не забывайте о точности вычислений!
 
 if __name__ == '__main__':
-    path_to_save = 'dungeon.csv'
+    game = Game()
+    game.main()
