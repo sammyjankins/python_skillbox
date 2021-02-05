@@ -36,7 +36,7 @@ SCENARIOS = {
                 "next_step": 'step3',
             },
             "step3": {
-                "text": 'Спасибо за регистрацию, {name}! Мы отправили вам на {e-mail} билет, распечатайте его.',
+                "text": 'Спасибо за регистрацию, {name}! Мы отправили вам на {email} билет, распечатайте его.',
                 "failure_text": None,
                 "handler": None,
                 "next_step": None,

@@ -37,7 +37,7 @@ class Bot:
     """
     Echo bot for vk.com
 
-    Use Python 3.7
+    Use Python 3.7.6
     """
 
     def __init__(self, group_id, token):
@@ -52,6 +52,8 @@ class Bot:
         self.api = self.vk.get_api()
         self.long_poller = VkBotLongPoll(self.vk, self.group_id)
         self.user_states = dict()  # user -> UserState
+        # self.default_answer_method = twisted.get_answer
+        self.default_answer_method = gen_funny
 
     def run(self):
         """
@@ -61,6 +63,7 @@ class Bot:
         for event in self.long_poller.listen():
             try:
                 self.on_event(event)
+                pprint(event)
             except Exception as exc:
                 log.exception(exc)
 
@@ -86,7 +89,7 @@ class Bot:
         else:
             for intent in INTENTS:
                 log.debug(f'User gets {intent}')
-                if any(token in text for token in intent['tokens']):
+                if any(token in text.lower() for token in intent['tokens']):
                     if intent['answer']:
                         text_to_send = intent['answer']
                     else:
@@ -97,7 +100,7 @@ class Bot:
                 # построенная цепями Маркова.
 
                 # text_to_send = twisted.get_answer()
-                text_to_send = gen_funny()  # Марков
+                text_to_send = self.default_answer_method()  # Марков
 
         self.api.messages.send(message=text_to_send,
                                random_id=randint(0, 2 ** 20),

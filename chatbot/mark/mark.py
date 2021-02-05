@@ -95,7 +95,7 @@ def console_test():
             print('Ну ок...')
             break
         else:
-            print(gen_funny())
+            pprint(gen_funny())
 
 
 def gen_funny():
@@ -122,4 +122,4 @@ with open('algtest_classifyer.clf', 'wb') as f:
     pickle.dump(ppl, f)
 
 if __name__ == '__main__':
-    console_test(text_m, ppl)
+    console_test()

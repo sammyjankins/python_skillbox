@@ -16,7 +16,7 @@ def handle_name(text, context):
 def handle_email(text, context):
     matches = re.findall(re_email, text)
     if len(matches) > 0:
-        context['e-mail'] = matches[0]
+        context['email'] = matches[0]
         return True
     else:
         return False
