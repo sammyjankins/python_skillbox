@@ -4,6 +4,7 @@
 # заполняется заранее, чтобы пользователь долго не ждал ответа
 import re
 from collections import deque
+from pprint import pprint
 from random import choice
 from threading import Thread, Lock
 from time import sleep
@@ -39,8 +40,8 @@ with open('foul_language_for_filter.txt', mode='r', encoding='utf8') as file:
 
 def foul_filter(text):
     """Фильтр неугодных словечек"""
-    text = text.lower()
-    words = foul_words
+    text = text.lower()  # проверяемое слово
+    words = foul_words  # список искомых слов
 
     for word in words:
         for part in range(len(text)):
@@ -148,7 +149,9 @@ def all_artist_lyrics():
         f.write('\n'.join(txt))
 
 
-filler = FillThis(twisted_words)
-lock = Lock()
-with lock:
-    filler.start()
+# filler = FillThis(twisted_words)
+# lock = Lock()
+# with lock:
+#     filler.start()
+if __name__ == '__main__':
+    pass

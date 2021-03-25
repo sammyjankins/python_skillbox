@@ -101,6 +101,7 @@ from termcolor import cprint, colored
 from lesson_015.utils import user_input_handling, game_to_csv
 
 remaining_time = '123456.0987654321'
+
 # если изначально не писать число в виде строки - теряется точность!
 field_names = ['current_location', 'current_experience', 'current_date']
 getcontext().prec = len(remaining_time) + 1
@@ -368,4 +369,4 @@ class GameOverException(Exception):
 if __name__ == '__main__':
     game = Game()
     game.main()
-#зачёт!
+# зачёт!

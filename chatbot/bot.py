@@ -2,14 +2,14 @@
 
 
 import logging.config
-from pprint import pprint
+import random
 from random import randint
 
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 
 import handlers
-from bot_utils import SCENARIOS, INTENTS
+from bot_utils import SCENARIOS, INTENTS, DEFAULT_ANSWER
 from log_config import log_config
 # import twisted
 from mark.mark import gen_funny
@@ -30,7 +30,9 @@ class UserState:
     def __init__(self, scenario_name, step_name, context=None):
         self.scenario_name = scenario_name
         self.step_name = step_name
-        self.context = context or dict()
+        self.context = context or dict(step_index=0,
+                                       text_index=0,
+                                       failure_index=0)
 
 
 class Bot:
@@ -52,8 +54,11 @@ class Bot:
         self.api = self.vk.get_api()
         self.long_poller = VkBotLongPoll(self.vk, self.group_id)
         self.user_states = dict()  # user -> UserState
+        # Два варианта ответа по умолчанию - случайная фраза из текстов песен, либо фраза,
+        # построенная цепями Маркова.
+
         # self.default_answer_method = twisted.get_answer
-        self.default_answer_method = gen_funny
+        self.default_answer_method = [gen_funny, lambda: DEFAULT_ANSWER]
 
     def run(self):
         """
@@ -63,7 +68,6 @@ class Bot:
         for event in self.long_poller.listen():
             try:
                 self.on_event(event)
-                pprint(event)
             except Exception as exc:
                 log.exception(exc)
 
@@ -78,29 +82,24 @@ class Bot:
             log.info(f"Can't handle this type of event: {event.type}")
             return
 
-        pprint(event.object)
-
         user_id = event.object['message']['peer_id']
         text = event.object['message']['text']
 
-        if user_id in self.user_states:
-            text_to_send = self.continue_scenario(user_id=user_id,
-                                                  text=text)
+        for intent in INTENTS:
+            log.debug(f'User gets {intent}')
+            if any(token in text.lower() for token in intent['tokens']):
+                if intent['answer']:
+                    text_to_send = intent['answer']
+                else:
+                    text_to_send = self.start_scenario(intent['scenario'], user_id)
+                break
         else:
-            for intent in INTENTS:
-                log.debug(f'User gets {intent}')
-                if any(token in text.lower() for token in intent['tokens']):
-                    if intent['answer']:
-                        text_to_send = intent['answer']
-                    else:
-                        text_to_send = self.start_scenario(intent['scenario'], user_id)
-                    break
+            if user_id in self.user_states:
+                text_to_send = self.continue_scenario(user_id=user_id,
+                                                      text=text)
             else:
-                # Два варианта ответа по умолчанию - случайная фраза из текстов песен, либо фраза,
-                # построенная цепями Маркова.
-
-                # text_to_send = twisted.get_answer()
-                text_to_send = self.default_answer_method()  # Марков
+                # Марков либо ответ по умолчанию
+                text_to_send = random.choices(self.default_answer_method, k=1, weights=[1, 4])[0]()
 
         self.api.messages.send(message=text_to_send,
                                random_id=randint(0, 2 ** 20),
@@ -110,9 +109,11 @@ class Bot:
         scenario = SCENARIOS[scenario_name]
         first_step = scenario['first_step']
         step = scenario['steps'][first_step]
-        text_to_send = step['text']
+        text_to_send = step['text'][0]
         self.user_states[user_id] = UserState(scenario_name=scenario_name,
                                               step_name=first_step)
+        if not all(step['next_step']):
+            self.user_states.pop(user_id)
         return text_to_send
 
     def continue_scenario(self, user_id, text):
@@ -122,16 +123,20 @@ class Bot:
         step = steps[state.step_name]
         handler = getattr(handlers, step['handler'])
         if handler(text, state.context):
-            next_step = steps[step['next_step']]
-            text_to_send = next_step['text'].format(**state.context)
-            if next_step['next_step']:
-                state.step_name = step['next_step']
+            next_step = steps[step['next_step'][state.context['step_index']]]
+            print(step['next_step'][state.context['step_index']])
+            print(next_step)
+            text_to_send = next_step['text'][state.context['text_index']].format(**state.context)
+            if all(next_step['next_step']):
+                state.step_name = step['next_step'][state.context['step_index']]
             else:
-                log.info('Зарегистрирован: {name} - {email}'.format(**state.context))
+                # log.info('Зарегистрирован: {name} - {email}'.format(**state.context))
                 self.user_states.pop(user_id)
         else:
-            text_to_send = step['failure_text'].format(**state.context)
-
+            text_to_send = step['failure_text'][state.context['failure_index']].format(**state.context)
+        state.context['text_index'] = 0
+        state.context['step_index'] = 0
+        state.context['failure_index'] = 0
         return text_to_send
 
 
