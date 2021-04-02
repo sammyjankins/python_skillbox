@@ -19,7 +19,7 @@ log_config = {
         'file_handler': {
             'class': 'logging.FileHandler',
             'formatter': 'file_formatter',
-            'filename': 'bot.log',
+            'filename': 'data/bot.log',
             'level': 'DEBUG',
             'delay': 'True'
         },

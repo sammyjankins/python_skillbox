@@ -134,11 +134,11 @@ def get_random_departures():
 
 def get_routes():
     try:
-        with open('routes.json', 'r', encoding='utf8') as file:
+        with open('data/routes.json', 'r', encoding='utf8') as file:
             return json.load(file)
     except FileNotFoundError:
         route_dict = generate_routes()
-        with open('routes.json', 'w', encoding='utf8') as file:
+        with open('data/routes.json', 'w', encoding='utf8') as file:
             json.dump(route_dict, file)
         return route_dict
 

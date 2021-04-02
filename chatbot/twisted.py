@@ -33,7 +33,7 @@ def decipher_this(string):
     return ' '.join(map(decipher_word, string.split()))
 
 
-with open('foul_language_for_filter.txt', mode='r', encoding='utf8') as file:
+with open('data/foul_language_for_filter.txt', mode='r', encoding='utf8') as file:
     foul_language = file.read()
     foul_words = [decipher_this(value) for value in foul_language.split(', ')][:-2]
 

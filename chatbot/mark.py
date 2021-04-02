@@ -40,25 +40,25 @@ def clear_text(txt):
 # 2 - Сатанинская библия, А. Лавей
 # 3 - Несколько книг по садоводству, имена авторов забыл
 
-with open('extrim.txt', encoding='utf8') as f:
+with open('data/extrim.txt', encoding='utf8') as f:
     txt_1 = clear_text(f.read())
 
-with open('lavey.txt', encoding='cp1251') as f:
+with open('data/lavey.txt', encoding='cp1251') as f:
     txt_2 = clear_text(f.read())
 
-with open('sad.txt', encoding='utf8') as f:
+with open('data/sad.txt', encoding='utf8') as f:
     txt_3 = clear_text(f.read())
 
 text = txt_1 + txt_2 + txt_3
 text_m = markovify.Text(text)
-with open('lm.bin', 'wb') as f:
+with open('data/lm.bin', 'wb') as f:
     pickle.dump(text_m, f)
 
 # ВАЖНО:
-# для переформирования датасета (при изменении источников текста) нужно удалить папку data
+# для переформирования датасета (при изменении источников текста) нужно удалить text_garbage.txt
 path = 'data'
 filename = 'text_garbage'
-if not os.path.exists(path):
+if not os.path.exists(f'{path}/{filename}.csv'):
     print('CREATE AND SAVE TO CSV...')
     base = sent_tokenize(txt_3)
     modifier = sent_tokenize(txt_1 + txt_2)
@@ -70,7 +70,6 @@ if not os.path.exists(path):
     df = df.sample(frac=1).reset_index(drop=True)
     df.to_csv(f'{filename}.csv', index=False)
 
-    os.mkdir(path)
     os.rename(f'{filename}.csv', f'{path}/{filename}.csv')
 else:
     print('READING FROM CVS...')
@@ -118,7 +117,7 @@ ppl.fit(X_train, y=y_train)
 print(classification_report(y_test, ppl.predict(X_test)))
 print(accuracy_score(y_test, ppl.predict(X_test)))
 
-with open('algtest_classifyer.clf', 'wb') as f:
+with open('data/algtest_classifyer.clf', 'wb') as f:
     pickle.dump(ppl, f)
 
 if __name__ == '__main__':

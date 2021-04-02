@@ -44,11 +44,11 @@ def handle_city(text, context, context_key):
     for key in re_city_patterns:
         if re.search(re_city_patterns[key], re.sub(r'[- ]', '', text.lower())):
             context[context_key] = key
-            print(', '.join([x for x in routes[context['from_']]]))
+            print(', '.join(routes[context['from_']]))
             if context_key == 'to' and not bool(routes[context['from_']].get(context['to'])):
-                context['step_index'] = 1
+                context['step_index'] = 'no_routes'
             else:
-                context['step_index'] = 0
+                context['step_index'] = 'regular'
             return True
     return False
 
@@ -63,21 +63,23 @@ def handle_date(text, context):
         iso_format = f'{year}-{month}-{day}'
         date = datetime.fromisoformat(iso_format)
         if date < datetime.today():
-            context['text_index'] = 1
+            context['text_index'] = 'past_date'
         flights = routes[context['from_']][context['to']]['flights']
         for flight in flights:
             if check_future_date(iso_format, flight['date']):
                 flight_index = flights.index(flight)
                 break
         else:
-            context['failure_index'] = 1
+            context['failure_index'] = 'late_date'
             return False
-        context['next_five'] = {flight['id']: flight for flight in flights[flight_index: flight_index + 5]}
+        context['next_five'] = {str(index + 1): flight for index, flight in
+                                enumerate(flights[flight_index: flight_index + 5])}
         context['msg_five'] = '\n\n'.join(
-            [f'{context["next_five"][flight]["id"]} - {context["next_five"][flight]["dow"]}'
+            [f'{flight}. {context["next_five"][flight]["id"]} - {context["next_five"][flight]["dow"]}'
              f', {context["next_five"][flight]["date"]} '
              f'{context["next_five"][flight]["time"]}\n'
              f'Стоимость рейса: {context["next_five"][flight]["cost"]}'
+
              for flight in context['next_five']])
         return True
     except ValueError:
@@ -85,9 +87,9 @@ def handle_date(text, context):
 
 
 def handle_route(text, context):
-    if text in context['next_five']:
+    if text.isdigit() and 1 <= int(text) <= 5:
         route = context['next_five'][text]
-        context.update({'route_id': text,
+        context.update({'route_id': route['id'],
                         'route_description': f'{route["id"]} - {route["dow"]}, {route["date"]} {route["time"]}',
                         'route_cost': route["cost"]})
 
@@ -95,13 +97,12 @@ def handle_route(text, context):
 
 
 def handle_seats(text, context):
-    if text.isdigit():
-        if 1 <= int(text) <= 5:
-            context['seats'] = int(text)
-            context['total_cost'] = context['route_cost'] * context['seats']
-            if context.get('comment'):
-                context['step_index'] = 1
-            return True
+    if text.isdigit() and 1 <= int(text) <= 5:
+        context['seats'] = int(text)
+        context['total_cost'] = context['route_cost'] * context['seats']
+        if context.get('comment'):
+            context['step_index'] = 'commented'
+        return True
 
 
 def handle_comment(text, context):
@@ -113,11 +114,11 @@ def handle_confirm(text, context):
     if 'ок' in text.lower():
         pass
     elif 'дат' in text.lower():
-        context['step_index'] = 1
+        context['step_index'] = 'date'
     elif 'мест' in text.lower():
-        context['step_index'] = 2
+        context['step_index'] = 'seats'
     elif 'коммент' in text.lower():
-        context['step_index'] = 3
+        context['step_index'] = 'comment'
     else:
         return False
     return True
